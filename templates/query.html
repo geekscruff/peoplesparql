@@ -1,0 +1,22 @@
+<!-- The Query Page -->
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+    <h1>Query</h1>
+    <!--
+    If there is a 'q' session variable, display the query result, otherwise show the run button.
+    Using safe here will autoescape the html being passed in the session variable.
+    -->
+    {% if session['q'] %}
+        {{ session['q'] | safe }}
+    {% else %}
+        <p>
+            Let's do some sparql.
+        </p>
+        <!-- The form simply passes an empty post back to the calling page. -->
+        <form action="{{ url_for('query') }}" method=post>
+            <input type=submit value=Run>
+        </form>
+    {% endif %}
+    <p></p>
+{% endblock %}

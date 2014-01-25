@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>People Sparql - {% block title %}{% endblock %}</title>
+    {% endblock %}
+  </head>
+  <body>
+    <header>
+        {% block header %}
+        <p><a href="/">home</a> | <a href="/query">query</a></p>
+        {% endblock %}
+    </header>
+    <div id="content">
+        {% block content %}
+        <p>some default content</p>
+        {% endblock %}
+    </div>
+    <footer>
+      {% block footer %}
+      &copy; 2013 by <a href="http://geekscruff.me/">geekscruff</a>.
+      {% endblock %}
+    </footer>
+  </body>
+</html>
