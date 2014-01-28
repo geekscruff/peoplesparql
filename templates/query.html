@@ -11,10 +11,16 @@
         {{ session['q'] | safe }}
     {% else %}
         <p>
-            Let's do some sparql.
+            Let's do some sparql. Choose an endpoint to bring back 100 subject/object pairs with the predicate: http://www.w3.org/2000/01/rdf-schema#label
         </p>
         <!-- The form simply passes an empty post back to the calling page. -->
         <form action="{{ url_for('query') }}" method=post>
+            <select name="sparql">
+                <option value="http://collection.britishmuseum.org/sparql">British Museum</option>
+                <option value="http://data.archiveshub.ac.uk:8080/sparql/">Archives Hub</option>
+                <option value="http://bnb.data.bl.uk/sparql">BNB</option>
+                <option value="http://dbpedia-live.openlinksw.com/sparql/">DBPedia</option>
+            </select>
             <input type=submit value=Run>
         </form>
     {% endif %}
