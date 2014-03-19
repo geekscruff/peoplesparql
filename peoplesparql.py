@@ -8,7 +8,20 @@ import sqlite3
 from contextlib import closing
 import datetime
 
-app = Flask(__name__)
+#import blueprints
+from project.project import project
+from home.home import home
+
+app = Flask('peoplesparql')
+
+#register blueprints
+app.register_blueprint(project)
+app.register_blueprint(home)
+
+# Blueprint can be registered many times
+app.register_blueprint(project, url_prefix='/project')
+app.register_blueprint(home, url_prefix='/')
+app.register_blueprint(home, url_prefix='/peoplesparql/')
 
 #local config
 DEBUG = True
@@ -22,7 +35,7 @@ PASSWORD = 'default'
 #this is now in the config
 
 #load any local config
-app.config.from_object(__name__)
+app.config.from_object('peoplesparql')
 #load production config from file
 #app.config.from_pyfile('/opt/peoplesparql/config.py', silent=False)
 
@@ -47,11 +60,6 @@ def teardown_request(exception):
     if db is not None:
         db.close()
 
-#Show the home page as the root
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 #Query page
 @app.route('/query', methods=['GET', 'POST'])
 def query():
@@ -60,16 +68,24 @@ def query():
     #if the query button is clicked, replace it with the sparql query result
     #TODO error handling
     if request.method == 'POST':
+
+        if request.form['sparql'] == "http://collection.britishmuseum.org/sparql":
+            person = "http://erlangen-crm.org/current/E21_Person"
+        else:
+            person = "http://xmlns.com/foaf/0.1/Person"
+        #DNB is throwing an error, caused by order by (not sure why)
         sparql = SPARQLWrapper(request.form['sparql'])
-        query = "SELECT DISTINCT ?s ?o{ ?s <http://www.w3.org/2000/01/rdf-schema#label> ?o } LIMIT 100"
-        sparql.setQuery(query)
+        query_string = "SELECT DISTINCT ?s ?o { ?s <http://www.w3.org/2000/01/rdf-schema#label> ?o . ?s ?p <"\
+            + person + ">} ORDER BY ASC(?o) LIMIT 100"
+        sparql.setQuery(query_string)
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
-        s = "<p>QUERY (example from " + request.form['sparql'] + ")</p><p>" + query + "</p>"
+        s = "<p>QUERY (example from " + request.form['sparql'] + ")</p><pre>" + query_string + "</pre>"
         s += "<p>RESULTS</p><table><tr><td>subject</td><td>predicate</td><td>object</td></tr>"
 
         for result in results["results"]["bindings"]:
-            s += "<tr><td>" + result["s"]["value"] + "</td><td>" + "http://www.w3.org/2000/01/rdf-schema#label" + "</td><td>" + result["o"]["value"] + "</td></tr>"
+            s += "<tr><td>" + result["s"]["value"] + "</td><td>" + "http://www.w3.org/2000/01/rdf-schema#label" + "" \
+                "</td><td>" + result["o"]["value"] + "</td></tr>"
         s += "</table>"
         s += "<p>FULL JSON <pre>" + str(results) + "</pre></p>"
         session['q'] = s
@@ -120,7 +136,6 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
-
 
 if __name__ == '__main__':
     init_db()

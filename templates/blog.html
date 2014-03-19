@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Blog{% endblock %}
-{% block header %}
-  <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/blog">blog</a> |
+{% block extra %}
+  <p>
   {% if not session.logged_in %}
     <a href="{{ url_for('login') }}">log in</a>
   {% else %}

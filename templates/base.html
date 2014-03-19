@@ -9,7 +9,14 @@
   <body>
     <header>
         {% block header %}
-        <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/blog">blog</a> </p>
+
+        {% if request.url_root['script_root'] == '/peoplesparql' %}
+            <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/blog">blog</a> | <a href="/peoplesparql/project">project</a></p>
+        {% elif request.url_root['script_root'] == null %}
+        <p><a href="/">home</a> | <a href="/query">query</a> | <a href="/blog">blog</a> | <a href="/project">project</a></p>
+       {% endif %}
+        {% endblock %}
+        {% block extra %}
         {% endblock %}
     </header>
     <div id="content">
@@ -19,7 +26,7 @@
     </div>
     <footer>
       {% block footer %}
-      &copy; 2013 by <a href="http://geekscruff.me/">geekscruff</a>.
+      &copy; 2013 by <a href="http://geekscruff.me/">Julie Allinson</a>.
       {% endblock %}
     </footer>
   </body>

@@ -11,7 +11,7 @@
         {{ session['q'] | safe }}
     {% else %}
         <p>
-            Let's do some sparql. Choose an endpoint to bring back 100 subject/object pairs with the predicate: http://www.w3.org/2000/01/rdf-schema#label
+            Let's do some sparql. Choose an endpoint to bring back the identifier and label for 100 people
         </p>
         <!-- The form simply passes an empty post back to the calling page. -->
         <form action="{{ url_for('query') }}" method=post>
