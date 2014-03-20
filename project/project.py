@@ -7,6 +7,7 @@ project = Blueprint('project', __name__,
                         template_folder='templates')
 
 @project.route('/project', defaults={'page': 'project'})
+@project.route('/blog', defaults={'page': 'blog'})
 @project.route('/<page>')
 def show(page):
     try:

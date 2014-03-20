@@ -8,6 +8,9 @@ import sqlite3
 from contextlib import closing
 import datetime
 
+#to check if config file is in place
+import os.path
+
 #import blueprints
 from project.project import project
 from home.home import home
@@ -24,6 +27,7 @@ app.register_blueprint(home, url_prefix='/')
 app.register_blueprint(home, url_prefix='/peoplesparql/')
 
 #local config
+TESTING = True
 DEBUG = True
 SECRET_KEY = 'development key'
 DATABASE = '/tmp/peoplesparql.db'
@@ -32,12 +36,14 @@ PASSWORD = 'default'
 
 # this is taken from the example code, see doco for generating a new key, need this for sessions
 # set the secret key.  keep this really secret
-#this is now in the config
+# this is now in the config
 
-#load any local config
-app.config.from_object('peoplesparql')
-#load production config from file
-#app.config.from_pyfile('/opt/peoplesparql/config.py', silent=False)
+if os.path.isfile('/opt/peoplesparql/config.py'):
+    #load production config from file
+    app.config.from_pyfile('/opt/peoplesparql/config.py', silent=False)
+else:
+    #load local config
+    app.config.from_object('peoplesparql')
 
 #for flaskr
 def connect_db():
@@ -71,12 +77,14 @@ def query():
 
         if request.form['sparql'] == "http://collection.britishmuseum.org/sparql":
             person = "http://erlangen-crm.org/current/E21_Person"
+        elif request.form['sparql'] == "http://geekscruff.me/openrdf-sesame/repositories/peoplesparqltest":
+            person = "http://www.w3.org/2002/07/owl#NamedIndividual"
         else:
             person = "http://xmlns.com/foaf/0.1/Person"
-        #DNB is throwing an error, caused by order by (not sure why)
+        #DNB is throwing an error if I add ORDER BY ASC(?o) (not sure why - sparql version perhaps?)
         sparql = SPARQLWrapper(request.form['sparql'])
         query_string = "SELECT DISTINCT ?s ?o { ?s <http://www.w3.org/2000/01/rdf-schema#label> ?o . ?s ?p <"\
-            + person + ">} ORDER BY ASC(?o) LIMIT 100"
+            + person + ">}  LIMIT 100"
         sparql.setQuery(query_string)
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
@@ -136,6 +144,10 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
+
+@app.route('/config')
+def config():
+    return 'TESTING ' + str(DEBUG)
 
 if __name__ == '__main__':
     init_db()
