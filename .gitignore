@@ -23,7 +23,7 @@
 # Logs and databases #
 ######################
 *.log
-*.sql
+# *.sql #basic sql included which is useful in this project
 *.sqlite
  
 # OS generated files #
