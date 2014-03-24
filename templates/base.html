@@ -10,9 +10,9 @@
     <header>
         {% block header %}
 
-        {% if request.url_root['script_root'] == '/peoplesparql' %}
+        {% if "peoplesparql" in request.url_root %}
             <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/blog">blog</a> | <a href="/peoplesparql/project">project</a></p>
-        {% elif request.url_root['script_root'] == null %}
+        {% elif "peoplesparql" not in request.url_root %}
         <p><a href="/">home</a> | <a href="/query">query</a> | <a href="/blog">blog</a> | <a href="/project">project</a></p>
        {% endif %}
         {% endblock %}

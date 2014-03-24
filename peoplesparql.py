@@ -1,7 +1,8 @@
+import query
+
 __author__ = 'geekscruff'
 
 from flask import Flask, render_template, request, session, g, redirect, url_for, abort, flash
-from SPARQLWrapper import SPARQLWrapper, JSON
 
 #for flaskr
 import sqlite3
@@ -14,17 +15,20 @@ import os.path
 #import blueprints
 from project.project import project
 from home.home import home
+from query.query import query
 
 app = Flask('peoplesparql')
 
 #register blueprints
-app.register_blueprint(project)
 app.register_blueprint(home)
+app.register_blueprint(project)
+app.register_blueprint(query)
 
 # Blueprint can be registered many times
-app.register_blueprint(project, url_prefix='/project')
 app.register_blueprint(home, url_prefix='/')
 app.register_blueprint(home, url_prefix='/peoplesparql/')
+app.register_blueprint(project, url_prefix='/project')
+app.register_blueprint(query, url_prefix='/query')
 
 #local config
 TESTING = True
@@ -45,17 +49,6 @@ else:
     #load local config
     app.config.from_object('peoplesparql')
 
-#for flaskr
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
-
-
-def init_db():
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
-
 @app.before_request
 def before_request():
     g.db = connect_db()
@@ -65,39 +58,6 @@ def teardown_request(exception):
     db = getattr(g, 'db', None)
     if db is not None:
         db.close()
-
-#Query page
-@app.route('/query', methods=['GET', 'POST'])
-def query():
-    #destroy the existing query session on page load
-    session.pop('q', None)
-    #if the query button is clicked, replace it with the sparql query result
-    #TODO error handling
-    if request.method == 'POST':
-
-        if request.form['sparql'] == "http://collection.britishmuseum.org/sparql":
-            person = "http://erlangen-crm.org/current/E21_Person"
-        elif request.form['sparql'] == "http://geekscruff.me/openrdf-sesame/repositories/peoplesparqltest":
-            person = "http://www.w3.org/2002/07/owl#NamedIndividual"
-        else:
-            person = "http://xmlns.com/foaf/0.1/Person"
-        #DNB is throwing an error if I add ORDER BY ASC(?o) (not sure why - sparql version perhaps?)
-        sparql = SPARQLWrapper(request.form['sparql'])
-        query_string = "SELECT DISTINCT ?s ?o { ?s <http://www.w3.org/2000/01/rdf-schema#label> ?o . ?s ?p <"\
-            + person + ">}  LIMIT 100"
-        sparql.setQuery(query_string)
-        sparql.setReturnFormat(JSON)
-        results = sparql.query().convert()
-        s = "<p>QUERY (example from " + request.form['sparql'] + ")</p><pre>" + query_string + "</pre>"
-        s += "<p>RESULTS</p><table><tr><td>subject</td><td>predicate</td><td>object</td></tr>"
-
-        for result in results["results"]["bindings"]:
-            s += "<tr><td>" + result["s"]["value"] + "</td><td>" + "http://www.w3.org/2000/01/rdf-schema#label" + "" \
-                "</td><td>" + result["o"]["value"] + "</td></tr>"
-        s += "</table>"
-        s += "<p>FULL JSON <pre>" + str(results) + "</pre></p>"
-        session['q'] = s
-    return render_template('query.html')
 
 #for flaskr
 @app.route('/blog')
@@ -147,7 +107,17 @@ def logout():
 
 @app.route('/config')
 def config():
-    return 'TESTING ' + str(DEBUG)
+    return "TESTING " + str(app.config['TESTING']) + "<br />DEBUG " + str(app.config['DEBUG'])
+
+def init_db():
+    with closing(connect_db()) as db:
+        with app.open_resource('schema.sql', mode='r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+
+#for flaskr
+def connect_db():
+    return sqlite3.connect(app.config['DATABASE'])
 
 if __name__ == '__main__':
     init_db()
