@@ -33,9 +33,13 @@
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
+thumbs.db
 Thumbs.db
 
 # PyCharm Files #
 ################
 .idea/*
+
+# Allegrograph Python Library #
+###############################
+franz/*

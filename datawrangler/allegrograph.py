@@ -1,5 +1,4 @@
 __author__ = 'geekscruff'
-
 from franz.openrdf.sail.allegrographserver import AllegroGraphServer
 from franz.openrdf.repository.repository import Repository
 from franz.miniclient import repository
