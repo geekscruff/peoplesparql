@@ -1,17 +1,16 @@
 __author__ = 'geekscruff'
 
-from flask import Blueprint, render_template, abort, session, request
-from jinja2 import TemplateNotFound
+from flask import Blueprint, render_template, session, request
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-query = Blueprint('query', __name__,
+research = Blueprint('research', __name__,
                   template_folder='templates')
 
 #@query.route('/query', defaults={'page': 'query'})
 #@query.route('/<page>')
-#Query page
-@query.route('/query', defaults={'page': 'query'}, methods=['GET', 'POST'])
-@query.route('/<page>')
+#query page
+@research.route('/query', defaults={'page': 'query'}, methods=['GET', 'POST'])
+@research.route('/<page>')
 def show(page):
     if page == 'query':
     #destroy the existing query session on page load
@@ -34,7 +33,7 @@ def show(page):
             sparql.setQuery(query_string)
             sparql.setReturnFormat(JSON)
             results = sparql.query().convert()
-            s = "<p>QUERY (example from " + request.form['sparql'] + ")</p><pre>" + query_string + "</pre>"
+            s = "<p>query (example from " + request.form['sparql'] + ")</p><pre>" + query_string + "</pre>"
             s += "<p>RESULTS</p><table><tr><td>subject</td><td>predicate</td><td>object</td></tr>"
 
             for result in results["results"]["bindings"]:

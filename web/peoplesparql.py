@@ -1,4 +1,6 @@
-import query
+from home.home import home
+from project.project import project
+from research.research import research
 
 __author__ = 'geekscruff'
 
@@ -13,22 +15,23 @@ import datetime
 import os.path
 
 #import blueprints
-from project.project import project
-from home.home import home
-from query.query import query
 
 app = Flask('peoplesparql')
 
 #register blueprints
 app.register_blueprint(home)
 app.register_blueprint(project)
-app.register_blueprint(query)
+app.register_blueprint(research)
 
 # Blueprint can be registered many times
 app.register_blueprint(home, url_prefix='/')
 app.register_blueprint(home, url_prefix='/peoplesparql/')
+
 app.register_blueprint(project, url_prefix='/project')
-app.register_blueprint(query, url_prefix='/query')
+
+app.register_blueprint(research, url_prefix='/query')
+app.register_blueprint(research, url_prefix='/explore')
+app.register_blueprint(research, url_prefix='/create')
 
 #local config
 TESTING = True
