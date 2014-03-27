@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>People Sparql - {% block title %}{% endblock %}</title>
+    {% endblock %}
+  </head>
+  <body>
+    <header>
+        {% block header %}
+
+        {% if "peoplesparql" in request.url_root %}
+            <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/blog">blog</a> | <a href="/peoplesparql/project">project</a></p>
+        {% elif "peoplesparql" not in request.url_root %}
+        <p><a href="/">home</a> | <a href="/query">query</a> | <a href="/blog">blog</a> | <a href="/project">project</a></p>
+       {% endif %}
+        {% endblock %}
+        {% block extra %}
+        {% endblock %}
+    </header>
+    <div id="content">
+        {% block content %}
+        <p>some default content</p>
+        {% endblock %}
+    </div>
+    <footer>
+      {% block footer %}
+      &copy; 2013 by <a href="http://geekscruff.me/">Julie Allinson</a>.
+      {% endblock %}
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+<!-- The Survey Page -->
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>People Sparql - Requirements Survey</title>
+  </head>
+  <body>
+    <header>
+    </header>
+    <div id="content">
+        <h2>MSc Computing Dissertation Project Julie Allinson</h2>
+        <a style="font-size: 0.8em" href="#desc">read project description</a>
+        <br /><br />
+        <p style="font-size: 0.8em">If you haven't completed an ethics form, please do one here: <a href="consent">geekscruff.me/peoplesparql/consent</a></p>
+
+<iframe src="https://docs.google.com/forms/d/1dfL6HfujR6-Zs-YB8gks2yWovffzegTIAZNVOpB52U4/viewform?embedded=true"
+        width="700" height="1000" frameborder="0" marginheight="0" marginwidth="0">Loading...
+</iframe>
+
+<div style="font-size: 0.8em">
+    <br />
+    <h2><a name="desc"></a>Project Description</h2>
+    <p>Indexing and researching historical entities, such as people, places and events, is common practice both for
+    historical researchers and cultural heritage institutions (libraries, archives, museums and galleries) who seek to
+    describe their collections for discovery and re-use. This poster will describe a tool for the 'historian's
+    workbench' to help with researching and indexing personal names. The tool will make use of linked data sources, such
+    as the Virtual Name Authority File, the Library of Congress Names Authority File, DBPedia (the linked data
+    representation of Wikipedia) and the Archives Hub linked data service, to allow the researcher to search across
+    multiple sources. Once the correct name has been identified, the researcher can pinpoint information relevant to
+    their research and add local enrichment. Local data will be stored in a semantic data store as RDF, exposed for
+    searching via a SPARQL endpoint and made available in semantic formats such as JSON-LD. The aim is to allow the user
+    to consult multiple sources from a single query and key in only the information that cannot be identified elsewhere.
+    The researcher can thus work more quickly, more efficiently and draw on a greater corpus of sources. By exposing
+    enrichment data to the web, the researcher can contribute their own work to increase the pool of available
+    sources.</p>
+
+<ul>
+    <li>Would this hybrid approach of drawing together standard authority information with local context benefit it's
+        target audience of researchers and cultural heritage professionals?
+    </li>
+    <br/>
+    <li>Can current standards, technologies and linked data services support the proposed service?</li>
+</ul>
+
+<p></p>
+    </div>
+</div>
+    <footer>
+      &copy; 2013 by <a href="http://geekscruff.me/">geekscruff</a>.
+    </footer>
+  </body>
+</html>
