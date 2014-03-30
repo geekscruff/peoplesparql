@@ -14,6 +14,7 @@ def show(page):
     next = get_redirect_target()
     if page == 'login':
         if request.method == 'POST':
+            #Use flask.current_app; don't use app
             if request.form['username'] != current_app.config['USERNAME']:
                 error = 'Invalid username'
             elif request.form['password'] != current_app.config['PASSWORD']:
@@ -32,7 +33,9 @@ def show(page):
         flash('You were logged out')
         return redirect(url_for('home.show'))
 
-#Securely Redirect Back By Armin Ronacher http://flask.pocoo.org/snippets/62/
+#The following code is from 'Securely Redirect Back' By Armin Ronacher
+# http://flask.pocoo.org/snippets/62/
+#=====================================================================#
 
 def is_safe_url(target):
     ref_url = urlparse(request.host_url)
