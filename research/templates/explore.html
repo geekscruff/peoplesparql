@@ -1,0 +1,14 @@
+<!-- The Explore Page -->
+{% extends "base.html" %}
+{% block title %}Query{% endblock %}
+{% block content %}
+<h1>Explore</h1>
+{% if session['q'] %}
+        {{ session['q'] | safe }}
+    {% else %}
+<p>
+    TODO
+</p>
+{% endif %}
+
+{% endblock %}

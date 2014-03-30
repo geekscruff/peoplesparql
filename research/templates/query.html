@@ -8,19 +8,25 @@
     Using safe here will autoescape the html being passed in the session variable.
     -->
     {% if session['q'] %}
+        <p>The query:</p>
+        <pre>
+        {{ session['query'] }}
+            </pre>
+        <p>RESULTS (showing the rdfs label for 100 people [or less if there aren't 100 in the dataset]</p>
         {{ session['q'] | safe }}
     {% else %}
         <p>
-            Let's do some sparql. Choose an endpoint to bring back the identifier and label for 100 people
+            Let's do some sparql. Choose an endpoint to bring back the identifier and label for 100 people.
         </p>
         <!-- The form simply passes an empty post back to the calling page. -->
-        <form action="/query" method=post>
+        <form action="query" method=post>
             <select name="sparql">
                 <option value="http://collection.britishmuseum.org/sparql">British Museum</option>
                 <option value="http://data.archiveshub.ac.uk:8080/sparql/">Archives Hub</option>
                 <option value="http://bnb.data.bl.uk/sparql">BNB</option>
                 <option value="http://dbpedia-live.openlinksw.com/sparql/">DBPedia</option>
-                <option value="http://geekscruff.me:10035/catalogs/public-catalog/repositories/artworld-people">Artworld</option>
+                <option value="http://geekscruff.me:10035/catalogs/public-catalog/repositories/artworld-people">Artworld (local data)</option>
+                <option value="http://geekscruff.me:10035/catalogs/public-catalog/repositories/test">Test (local data)</option>
             </select>
             <input type=submit value=Run>
         </form>

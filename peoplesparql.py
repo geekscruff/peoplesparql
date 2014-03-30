@@ -1,7 +1,3 @@
-from home.home import home
-from project.project import project
-from research.research import research
-
 __author__ = 'geekscruff'
 
 from flask import Flask, render_template, request, session, g, redirect, url_for, abort, flash
@@ -15,13 +11,18 @@ import datetime
 import os.path
 
 #import blueprints
+from home.home import home
+from project.project import project
+from research.research import research
+from login.login import login
 
-app = Flask('peoplesparql')
+app = Flask(__name__)
 
 #register blueprints
 app.register_blueprint(home)
 app.register_blueprint(project)
 app.register_blueprint(research)
+app.register_blueprint(login)
 
 # Blueprint can be registered many times
 app.register_blueprint(home, url_prefix='/')
@@ -33,12 +34,14 @@ app.register_blueprint(research, url_prefix='/query')
 app.register_blueprint(research, url_prefix='/explore')
 app.register_blueprint(research, url_prefix='/create')
 
+app.register_blueprint(login, url_prefix='/login')
+
 #local config
 TESTING = True
 DEBUG = True
 SECRET_KEY = 'development key'
 DATABASE = '/tmp/peoplesparql.db'
-USERNAME = 'admin'
+USERNAME = 'test'
 PASSWORD = 'default'
 
 # this is taken from the example code, see doco for generating a new key, need this for sessions
@@ -85,27 +88,6 @@ def add_entry():
                  [request.form['title'], request.form['text'], now[:16]])
     g.db.commit()
     flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
-        else:
-            session['logged_in'] = True
-            session['user'] = request.form['username']
-            flash('You were logged in')
-            return redirect(url_for('show_entries'))
-    return render_template('login.html', error=error)
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out')
     return redirect(url_for('show_entries'))
 
 @app.route('/config')

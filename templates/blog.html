@@ -1,15 +1,2 @@
 {% extends "base.html" %}
 {% block title %}Blog{% endblock %}
-{% block extra %}
-  <p>
-  {% if not session.logged_in %}
-    <a href="{{ url_for('login') }}">log in</a>
-  {% else %}
-    <a href="{{ url_for('logout') }}">log out</a>
-  {% endif %}
-  </p>
-
-  {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
-  {% endfor %}
- {% endblock %}

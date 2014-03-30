@@ -1,22 +1,11 @@
 __author__ = 'geekscruff'
 from franz.openrdf.sail.allegrographserver import AllegroGraphServer
-from franz.openrdf.repository.repository import Repository
-from franz.miniclient import repository
-from franz.openrdf.query.query import QueryLanguage
-from franz.openrdf.model import URI
-from franz.openrdf.vocabulary.rdf import RDF
-from franz.openrdf.vocabulary.rdfs import RDFS
-from franz.openrdf.vocabulary.owl import OWL
-from franz.openrdf.vocabulary.xmlschema import XMLSchema
-from franz.openrdf.query.dataset import Dataset
-from franz.openrdf.rio.rdfformat import RDFFormat
-from franz.openrdf.rio.rdfwriter import  NTriplesWriter
-from franz.openrdf.rio.rdfxmlwriter import RDFXMLWriter
+from agraphpythonclient.src2.franz.openrdf.repository.repository import Repository
+from agraphpythonclient.src2.franz.openrdf.query.query import QueryLanguage
 
 AG_HOST = 'geekscruff.me'
 AG_PORT = 10035
 AG_CATALOG = 'public-catalog'
-# AG_CATALOG = ''
 AG_REPOSITORY = 'artworld-people'
 AG_USER = 'anonymous'
 AG_PASSWORD = ''

@@ -11,12 +11,23 @@
         {% block header %}
 
         {% if "peoplesparql" in request.url_root %}
-            <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/blog">blog</a> | <a href="/peoplesparql/project">project</a></p>
+            <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/create">create</a> | <a href="/peoplesparql/blog">blog</a> | <a href="/peoplesparql/project">project</a></p>
         {% elif "peoplesparql" not in request.url_root %}
-        <p><a href="/">home</a> | <a href="/query">query</a> | <a href="/blog">blog</a> | <a href="/project">project</a></p>
+        <p><a href="/">home</a> | <a href="/query">query</a> | <a href="/create">create</a> | <a href="/blog">blog</a> | <a href="/project">project</a></p>
        {% endif %}
         {% endblock %}
         {% block extra %}
+        <p>
+          {% if not session.logged_in %}
+            <a href="{{ url_for('login.show', page='login') }}">log in</a>
+          {% else %}
+            <a href="{{ url_for('login.show', page='logout') }}">log out</a>
+          {% endif %}
+          </p>
+
+        {% for message in get_flashed_messages() %}
+        <div class=flash>{{ message }}</div>
+        {% endfor %}
         {% endblock %}
     </header>
     <div id="content">
@@ -26,7 +37,7 @@
     </div>
     <footer>
       {% block footer %}
-      &copy; 2013 by <a href="http://geekscruff.me/">Julie Allinson</a>.
+      &copy; 2014 by <a href="http://geekscruff.me/">Julie Allinson</a>.
       {% endblock %}
     </footer>
   </body>
