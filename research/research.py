@@ -5,6 +5,8 @@ from flask import Blueprint, render_template, session, request, redirect, url_fo
 from querybuilder import sparqlquery
 from datawrangler import add
 
+import json
+
 research = Blueprint('research', __name__,
                      template_folder='templates')
 
@@ -26,7 +28,7 @@ def show(page):
             for result in results["results"]["bindings"]:
                 s += "<tr><td>http://geekscruff.me/people/" + request.form['name'].replace(" ", "") + "</td><td>" + result["p"]["value"] + "</td><td>" + result["o"]["value"]  + "</td></tr>"
             s += "</table>"
-            s += "<p>JSON OUTPUT <pre>" + str(results) + "</pre></p>"
+            # s += "<p>JSON OUTPUT <pre>" + str(results) + "</pre></p>"
             session['json'] = s
 
             addperson.close()
@@ -51,7 +53,10 @@ def show(page):
                                                                                                                       "</td><td>" + \
                      result["o"]["value"] + "</td></tr>"
             s += "</table>"
-            s += "<p>JSON OUTPUT <pre>" + str(results) + "</pre></p>"
+            # on the live server, a 500 error was being thrown (bad header) but only for the Archives Hub;
+            # could be related to the change in flask v. 0.8 where problems with JSON data throw this error
+            # need to figure out how to handle it properly but for now omit
+            # s += "<p>JSON OUTPUT <pre>" + json.dumps(results) + "</pre></p>"
             session['q'] = s
 
     elif page == 'explore':

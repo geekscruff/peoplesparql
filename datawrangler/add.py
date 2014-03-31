@@ -1,18 +1,14 @@
 __author__ = 'geekscruff'
 
-import os
-
 from franz.openrdf.sail.allegrographserver import AllegroGraphServer
 from franz.openrdf.repository.repository import Repository
 from franz.openrdf.vocabulary.rdf import RDF
 from franz.openrdf.vocabulary.rdfs import RDFS
 from querybuilder import sparqlquery
 
-
-AG_HOST = os.environ.get('AGRAPH_HOST', 'geekscruff.me')
-AG_PORT = int(os.environ.get('AGRAPH_PORT', '10035'))
-AG_CATALOG = os.environ.get('AGRAPH_CATALOG', 'public-catalog')
-# AG_CATALOG = ''
+AG_HOST = 'geekscruff.me'
+AG_PORT = 10035
+AG_CATALOG = 'public-catalog'
 AG_REPOSITORY = 'test'
 AG_USER = 'test'
 AG_PASSWORD = 'xyzzy'
@@ -29,11 +25,11 @@ class Add:
     def update(self, value):
         ## create some resources and literals to make statements out of
         self.value = value
-        noblanksvalue = value.replace(" ", "")
+        noblanksvalue = self.value.replace(" ", "")
         subject = self.conn.createURI("http://geekscruff.me/people/" + noblanksvalue)
         person = self.conn.createURI("http://xmlns.com/foaf/0.1/Person")
         #value entered by user
-        ob = self.conn.createLiteral(value)
+        ob = self.conn.createLiteral(self.value)
 
         ## our subject is a person
         self.conn.add(subject, RDF.TYPE, person)
@@ -44,7 +40,8 @@ class Add:
         endpoint = "http://" + AG_HOST + ":" + str(AG_PORT) + "/catalogs/" + AG_CATALOG + "/repositories/" + AG_REPOSITORY
         print endpoint
         query = sparqlquery.SparqlQuery(endpoint)
-        results = query.runfullquery(self.value)
+        #adding convert here seemed to fix a problem with the create results throwing a 500 error, I have no idea why
+        results = query.runfullquery(self.value).convert()
         self.query_string = query.querystring()
         return results
 
