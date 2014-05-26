@@ -2,6 +2,19 @@
 <html>
   <head>
     {% block head %}
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <script src="{{ config.PERSONA_JS }}"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script>
+      /* the url root is useful for doing HTTP requests */
+      var $URL_ROOT = {{ request.url_root|tojson }};
+
+      /* we store the current user here so that the persona
+         javascript support knows about the current user */
+      var $CURRENT_USER = {{ g.user|tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='site.js') }}"></script>
+    <script src="{{ url_for('static', filename='persona.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>People Sparql - {% block title %}{% endblock %}</title>
 
@@ -23,19 +36,27 @@
         {% block header %}
 
         {% if "peoplesparql" in request.url_root %}
-            <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/create">create</a> | <a href="/peoplesparql/blog">blog</a> | <a href="/peoplesparql/project">project</a></p>
+            <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/create">create</a> | <a href="/peoplesparql/project">project</a>
         {% elif "peoplesparql" not in request.url_root %}
-        <p><a href="/">home</a> | <a href="/query">query</a> | <a href="/create">create</a> | <a href="/blog">blog</a> | <a href="/project">project</a></p>
+        <p><a href="/">home</a> | <a href="/query">query</a> | <a href="/create">create</a> | <a href="/project">project</a>
        {% endif %}
+
+        <!-- Persona -->
+        <div class=authbar>
+        {% if g.user %}
+          Signed in as <em>{{ g.user }}</em>
+          (<a href="#" class=signout>Sign out</a>)
+        {% else %}
+          Not signed in. <a href="#" class=signin>Sign in</a> <a href="project/info"><img src="{{ url_for('static', filename='images/help.png') }}" alt="what's this?" /></a>
+        {% endif %}
+        </div>
+        <!-- End Persona -->
+
+         </p>
+
         {% endblock %}
         {% block extra %}
-        <p>
-          {% if not session.logged_in %}
-            <a href="{{ url_for('login.show', page='login') }}">log in</a>
-          {% else %}
-            <a href="{{ url_for('login.show', page='logout') }}">log out</a>
-          {% endif %}
-          </p>
+
 
         {% for message in get_flashed_messages() %}
         <div class=flash>{{ message }}</div>

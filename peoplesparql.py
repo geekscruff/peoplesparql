@@ -1,109 +1,100 @@
 __author__ = 'geekscruff'
 
-from flask import Flask, render_template, request, session, g, redirect, url_for, abort, flash
-
-#for flaskr
-import sqlite3
-from contextlib import closing
-import datetime
-
-#to check if config file is in place
-import os.path
-
-#import blueprints
+from flask import Flask, request, session, g, abort, json
 from home.home import home
 from project.project import project
 from research.research import research
-from login.login import login
+import requests, logging, os.path
+logger = logging.getLogger(__name__)
 
+# Get the app for use in setting up the config
 app = Flask(__name__)
 
-#register blueprints
+# Register the blueprints
 app.register_blueprint(home)
 app.register_blueprint(project)
 app.register_blueprint(research)
-app.register_blueprint(login)
 
-# Blueprint can be registered many times
+# Register the urls for the blueprints
 app.register_blueprint(home, url_prefix='/')
 app.register_blueprint(home, url_prefix='/peoplesparql/')
 
 app.register_blueprint(project, url_prefix='/project')
+app.register_blueprint(project, url_prefix='/info')
 
 app.register_blueprint(research, url_prefix='/query')
 app.register_blueprint(research, url_prefix='/explore')
 app.register_blueprint(research, url_prefix='/create')
 
-app.register_blueprint(login, url_prefix='/login')
-
-#local config
+# Use this local config if the production config is not available
 TESTING = True
 DEBUG = True
 SECRET_KEY = 'development key'
-DATABASE = '/tmp/peoplesparql.db'
-USERNAME = 'test'
-PASSWORD = 'default'
+PERSONA_JS = 'https://login.persona.org/include.js'
+PERSONA_VERIFIER = 'https://verifier.login.persona.org/verify'
+LOGLEVEL = 'DEBUG'
+# Configuration settings for working with Allegrograph graph db, see http://franz.com/agraph/allegrograph/
+AG_DATASOURCES = 'test'
+AG_HOST = 'localhost' # this needs to exist in local allegrograph
+AG_PORT = 10035 # assuming standard installation
+AG_CATALOG = 'public-catalog' # this needs to exist in local allegrograph
+AG_USER = 'test' # this needs to exist as use in local allegrograph with read/write access to 'test'
+AG_PASSWORD = '1234' # this needs to be the right password in local allegrograph
 
-# this is taken from the example code, see doco for generating a new key, need this for sessions
-# set the secret key.  keep this really secret
-# this is now in the config
-
+# Check for the production config file and load. If it is missing load the configuration from the current object.
 if os.path.isfile('/opt/peoplesparql/config.py'):
-    #load production config from file
     app.config.from_pyfile('/opt/peoplesparql/config.py', silent=False)
 else:
-    #load local config
     app.config.from_object('peoplesparql')
 
-@app.before_request
-def before_request():
-    g.db = connect_db()
+if app.config['LOGLEVEL'] == 'INFO':
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO, filename='/opt/peoplesparql/peoplesparql.log')
+    logging.basicConfig()
+elif app.config['LOGLEVEL'] == 'DEBUG':
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG, filename='/opt/peoplesparql/peoplesparql.log')
+else:
+    logging.basicConfig(format='%(asctime)s %(message)s', filename='/opt/peoplesparql/peoplesparql.log')
 
-@app.teardown_request
-def teardown_request(exception):
-    db = getattr(g, 'db', None)
-    if db is not None:
-        db.close()
+logger.info('INFO peoplesparql.py - logging Level ' + app.config['LOGLEVEL'])
 
-#for flaskr
-@app.route('/blog')
-def show_entries():
-    cur = g.db.execute('select title, text, created from entries order by id desc')
-    entries = [dict(title=row[0], text=row[1], created=row[2]) for row in cur.fetchall()]
-    return render_template('show_entries.html', entries=entries)
-
-@app.route('/blog/rss')
-def rss():
-    return 'I would like an rss feed here'
-
-@app.route('/add', methods=['POST'])
-def add_entry():
-    if not session.get('logged_in'):
-        abort(401)
-
-    now = str(datetime.datetime.now())
-    #date = str(now.day) + "-" + str(now.month) + "-" + str(now.year)
-
-    g.db.execute('insert into entries (title, text, created) values (?, ?, ?)',
-                 [request.form['title'], request.form['text'], now[:16]])
-    g.db.commit()
-    flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
-
+# This is used to test if the app is in test or production mode
 @app.route('/config')
 def config():
     return "TESTING " + str(app.config['TESTING']) + "<br />DEBUG " + str(app.config['DEBUG'])
 
-def init_db():
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
+# User login provided by the Flask persona example: https://github.com/mitsuhiko/flask/tree/master/examples/persona
+@app.before_request
+def get_current_user():
+    g.user = None
+    email = session.get('email')
+    if email is not None:
+        g.user = email
 
-#for flaskr
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
+@app.route('/_auth/login', methods=['GET', 'POST'])
+def login_handler():
+    """This is used by the persona.js file to kick off the
+    verification securely from the server side.  If all is okay
+    the email address is remembered on the server.
+    """
+    resp = requests.post(app.config['PERSONA_VERIFIER'], data={
+        'assertion': request.form['assertion'],
+        'audience': request.host_url,
+    }, verify=True)
+    if resp.ok:
+        verification_data = json.loads(resp.content)
+        if verification_data['status'] == 'okay':
+            session['email'] = verification_data['email']
+            return 'OK'
+
+    abort(400)
+
+@app.route('/_auth/logout', methods=['POST'])
+def logout_handler():
+    """This is what persona.js will call to sign the user
+    out again.
+    """
+    session.clear()
+    return 'OK'
 
 if __name__ == '__main__':
-    init_db()
     app.run()

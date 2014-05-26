@@ -4,32 +4,59 @@
 {% block content %}
     <h1>Query</h1>
     <!--
-    If there is a 'q' session variable, display the query result, otherwise show the run button.
+    If there is a 'q' session variable, display the query result, otherwise show the search box.
     Using safe here will autoescape the html being passed in the session variable.
     -->
-    {% if session['q'] %}
-        <p>The query:</p>
-        <pre>
-        {{ session['query'] }}
-            </pre>
-        <p>RESULTS (showing the rdfs label for 100 people [or less if there aren't 100 in the dataset]</p>
-        {{ session['q'] | safe }}
+    {% if session['query'] %}
+        <p>
+        {{ session['query'] | safe }}
+        </p>
+
+        <p> {{ session['ep'] | safe }}
+        </p>
+        {% if session['q'] %}
+            <h2>Results</h2>
+
+            {{ session['q'] | safe }}
+
+        {% endif %}
+        <br />
+        <form action="query" method=get>
+            <input type=submit value="New Query">
+        </form>
     {% else %}
         <p>
-            Let's do some sparql. Choose an endpoint to bring back the identifier and label for 100 people.
+            Enter the name of the person you want to search for in the box below. You do not need to worry about word order or capitals.
         </p>
         <!-- The form simply passes an empty post back to the calling page. -->
         <form action="query" method=post>
-            <select name="sparql">
-                <option value="http://collection.britishmuseum.org/sparql">British Museum</option>
-                <option value="http://data.archiveshub.ac.uk/sparql">Archives Hub</option>
-                <option value="http://bnb.data.bl.uk/sparql">BNB</option>
-                <option value="http://dbpedia-live.openlinksw.com/sparql/">DBPedia</option>
-                <option value="http://geekscruff.me:10035/catalogs/public-catalog/repositories/artworld-people">Artworld (local data)</option>
-                <option value="http://geekscruff.me:10035/catalogs/public-catalog/repositories/test">Test (local data)</option>
-            </select>
-            <input type=submit value=Run>
+            <input name="term" type="text" />
+            <br /><br />
+            Choose one or more query target(s):
+            <br />
+            <!-- TODO Find a cleaner way to populate this list -->
+
+            <table>
+                {% if session['eps'] %}
+
+                {{ session['eps'] | safe }}
+
+                {% else %}
+
+                <p>There was a problem retrieving the list of endpoints.</p>
+
+                {% endif %}
+            </table>
+            <!-- select all / clear all -->
+            <br />
+            <input type=submit value=Search>
         </form>
-    {% endif %}
+   {% endif %}
+        <br /><br />
+        <form id="addnew" name="addnew" action="query" method=post>
+            <input id="button" value="Add New Query Target" type="button">
+            <!-- we will use some javascript to show the text box -->
+        </form>
+
     <p></p>
 {% endblock %}

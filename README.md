@@ -10,4 +10,4 @@ SPARQLWrapper
 
 (and possibly a few more)
 
-Also the AllegroGraph python client should be places as a package inside the peoplesparql main package, see http://franz.com/agraph/support/documentation/v4/python-tutorial/python-API-40.html
+Also the AllegroGraph python client as used here is included as a package inside the peoplesparql main package, see http://franz.com/agraph/support/documentation/v4/python-tutorial/python-API-40.html

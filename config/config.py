@@ -7,5 +7,5 @@ SECRET_KEY = 'changeme'
 DATABASE = '/opt/peoplesparql.db'
 USERNAME = 'changeme'
 PASSWORD = 'changeme'
-
+LOGLEVEL = 'debug'
 
