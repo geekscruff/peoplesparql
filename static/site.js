@@ -1,4 +1,5 @@
 // Add an onclick function onto the add new target button to show the relevant fields
+
 window.onload = function()
 {
     var b = document.getElementById("button");

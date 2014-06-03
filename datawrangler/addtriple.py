@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class AddTriple():
     def __init__(self, conn):  # conn is the repository connection
-        logger.debug('DEBUG addtriple.py - object instantiated', sub)
+        logger.debug('DEBUG addtriple.py - object instantiated')
         self.conn = conn
         self.sub = ""
 

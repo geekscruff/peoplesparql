@@ -1,77 +1,91 @@
 <!doctype html>
 <html>
-  <head>
+<head>
     {% block head %}
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <script src="{{ config.PERSONA_JS }}"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-    <script>
-      /* the url root is useful for doing HTTP requests */
-      var $URL_ROOT = {{ request.url_root|tojson }};
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 
-      /* we store the current user here so that the persona
-         javascript support knows about the current user */
-      var $CURRENT_USER = {{ g.user|tojson }};
+    <script>
+          /* the url root is useful for doing HTTP requests */
+          var $URL_ROOT = {{ request.url_root|tojson }};
+
+          /* we store the current user here so that the persona
+             javascript support knows about the current user */
+          var $CURRENT_USER = {{ g.user|tojson }};
     </script>
+
+    <script>
+        /* From http://jsfiddle.net/sVQwA/ */
+        $(document).ready(function () {
+            $("#selectall").click(function () {
+                $(".check").prop('checked', $(this).prop('checked'));
+            });
+        });
+    </script>
+
     <script src="{{ url_for('static', filename='site.js') }}"></script>
     <script src="{{ url_for('static', filename='persona.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>People Sparql - {% block title %}{% endblock %}</title>
 
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-24543669-3', 'geekscruff.me');
-  ga('send', 'pageview');
-
-</script>
+      ga('create', 'UA-24543669-3', 'geekscruff.me');
+      ga('send', 'pageview');
+    </script>
 
     {% endblock %}
-  </head>
-  <body>
-    <header>
-        {% block header %}
+</head>
+<body>
+<header>
+    {% block header %}
 
-        {% if "peoplesparql" in request.url_root %}
-            <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/create">create</a> | <a href="/peoplesparql/project">project</a>
+    {% if "peoplesparql" in request.url_root %}
+    <p><a href="/peoplesparql">home</a> | <a href="/peoplesparql/query">query</a> | <a href="/peoplesparql/create">create</a>
+        | <a href="/peoplesparql/project">project</a>
         {% elif "peoplesparql" not in request.url_root %}
-        <p><a href="/">home</a> | <a href="/query">query</a> | <a href="/create">create</a> | <a href="/project">project</a>
-       {% endif %}
+
+    <p><a href="/">home</a> | <a href="/query">query</a> | <a href="/create">create</a> | <a href="/project">project</a>
+        {% endif %}
 
         <!-- Persona -->
-        <div class=authbar>
+
+    <div class=authbar>
         {% if g.user %}
-          Signed in as <em>{{ g.user }}</em>
-          (<a href="#" class=signout>Sign out</a>)
+        Signed in as <em>{{ g.user }}</em>
+        (<a href="#" class=signout>Sign out</a>)
         {% else %}
-          Not signed in. <a href="#" class=signin>Sign in</a> <a href="project/info"><img src="{{ url_for('static', filename='images/help.png') }}" alt="what's this?" /></a>
+        Not signed in. <a href="#" class=signin>Sign in</a> <a href="project/info"><img
+            src="{{ url_for('static', filename='images/help.png') }}" alt="what's this?"/></a>
         {% endif %}
-        </div>
-        <!-- End Persona -->
-
-         </p>
-
-        {% endblock %}
-        {% block extra %}
-
-
-        {% for message in get_flashed_messages() %}
-        <div class=flash>{{ message }}</div>
-        {% endfor %}
-        {% endblock %}
-    </header>
-    <div id="content">
-        {% block content %}
-        <p>some default content</p>
-        {% endblock %}
     </div>
-    <footer>
-      {% block footer %}
-      &copy; 2014 by <a href="http://geekscruff.me/">Julie Allinson</a>.
-      {% endblock %}
-    </footer>
-  </body>
+    <!-- End Persona -->
+
+    </p>
+
+    {% endblock %}
+    {% block extra %}
+
+
+    {% for message in get_flashed_messages() %}
+    <div class=flash>{{ message }}</div>
+    {% endfor %}
+    {% endblock %}
+</header>
+<div id="content">
+    {% block content %}
+    <p>some default content</p>
+    {% endblock %}
+</div>
+<footer>
+    {% block footer %}
+    &copy; 2014 by <a href="http://geekscruff.me/">Julie Allinson</a>.
+    {% endblock %}
+</footer>
+</body>
 </html>

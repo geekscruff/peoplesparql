@@ -7,7 +7,7 @@ body {
     font-family: 'Verdana', sans-serif;
     font-size: 15px;
     margin: 30px auto;
-    width: 720px;
+    width: 960px;
     background: white;
     padding: 30px;
 }
@@ -24,17 +24,7 @@ pre {
     white-space: pre-wrap;
 }
 
-table
-{
-border-collapse:collapse;
-width:100%;
-table-layout: fixed;
-}
-table, td
-{
-border: 1px solid black;
-/* word-wrap:break-word */
-}
+
 
 #tiny
 {
@@ -57,3 +47,39 @@ border: 1px solid black;
 .error          { background: #f0d6d6; padding: 0.5em; }
 
 .authbar { float: right }
+
+.res            { background: #f0d6d6 }
+
+table
+{
+border-collapse:collapse;
+width:94%;
+table-layout: fixed;
+}
+
+table, td
+{
+
+/* word-wrap:break-word */
+}
+
+.resultstable   {
+                    margin-left: 3%;
+                    margin-right: 3%;
+                    background: white;
+                }
+
+.resultstable td  {
+                    border: 1px solid black;
+                }
+
+.more   {
+                    margin-left: 3%;
+                    margin-right: 3%;
+                    background: #f0d6d6;
+                    font-size 0.8em
+                }
+
+.more td  {
+                    border: 1px solid grey;
+                }

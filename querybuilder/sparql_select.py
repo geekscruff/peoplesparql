@@ -19,6 +19,8 @@ class SparqlSelect():
         self.sel = sel  # any combination of ?s (subject) ?p (predicate) and ?o (object), or * for all
         self.dist = ""
         self.pref = ""
+        self.order = ""
+        self.group = ""
 
     # Limit the query to distinct
     def distinct(self):
@@ -34,6 +36,12 @@ class SparqlSelect():
                    "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs:	<http://www.w3.org/2000/01/rdf-schema#> " \
                    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> PREFIX crm: <http://erlangen-crm.org/current/>"
         self.pref = prefixes
+
+    def orderby(self, order):
+        self.order = order
+
+    def groupby(self, group):
+        self.group = group
 
     def select(self):
         try:
@@ -51,6 +59,12 @@ class SparqlSelect():
 
             if self.limit is not 0:
                 query_string = query_string + " LIMIT " + str(self.limit)
+
+            if self.order is not "":
+                query_string = query_string + " ORDER BY " + str(self.order)
+
+            if self.group is not "":
+                query_string = query_string + " GROUP BY " + str(self.group)
 
             logger.info("INFO sparql_select.py - query string: " + query_string)
             #print(query_string) #can be useful for debugging

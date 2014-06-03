@@ -45,9 +45,9 @@ class SparqlQuery:
 
                 if term.endswith(' UNION '):
                     term = term[:-7]
-
                 sel = sparql_select.SparqlSelect(term, self.ep, 0, "*")
                 sel.distinct()
+                sel.orderby("?o")
                 logger.debug("DEBUG sparql_query.py - name search performed")
                 return sel.select()
         except URLError as e:
@@ -78,11 +78,25 @@ class SparqlQuery:
 
     def buildregexone(self):
         #split the value up and create a regex line for each
-        if " " in self.val:
-            terms = self.val.split()
+        if " " in self.val or "." in self.val:
+            # replace any dots with spaces and any double spaces with single
+            value = self.val.replace(".", " ").replace("  ", " ")
+            terms = value.split()
             regex = " FILTER ("
             for term in terms:
-                regex += ' (regex(?o, "' + term + '","i")) && '
+                # if term is only one character it is likely to be an initial
+                # let's look for it at the start of the label or preceeded with a space
+                if len(term) == 1:
+                    regex += ' (regex(?o, " ' + term + '","i") || regex(?o, "^' + term + '","i")) && '
+                # if term is two characters, let's look for each letter as though they are initials
+                # and for the term itself, as the start of a name
+                elif len(term) == 2:
+                    regex += ' (regex(?o, " ' + term + '","i") || regex(?o, "^' + term + '","i")) && '
+                    #for now we just search for both letters together, but ideally would break up and search individually too
+                    # regex += ' (regex(?o, " ' + term[0] + '","i") || regex(?o, "^' + term[0] + '","i")) && '
+                    # regex += ' (regex(?o, " ' + term[:1] + '","i") || regex(?o, "^' + term[:1] + '","i")) && '
+                else:
+                    regex += ' (regex(?o, "' + term + '","i")) && '
         else:
             regex = ' FILTER (regex(?o, "' + self.val + '","i")) '
 
@@ -95,12 +109,24 @@ class SparqlQuery:
     def buildregextwo(self):
         #split the value up and create a regex line for each
         regex = ""
-        if " " in self.val:
-            terms = self.val.split()
+        if " " in self.val or "." in self.val:
+            value = self.val.replace(".", " ").replace("  ", " ")
+            terms = value.split()
             for term in terms:
-                regex += ' FILTER (regex(?o, "' + term + '","i")) '
+                if len(term) == 1:
+                    regex += ' FILTER (regex(?o, " ' + term + '","i") || regex(?o, "^' + term + '","i")) '
+                elif len(term) == 2:
+                    regex += ' FILTER (regex(?o, " ' + term + '","i") || regex(?o, "^' + term + '","i" || ) '
+                    #for now we just search for both letters together, but ideally would break up and search individually too
+                    #regex += ' FILTER (regex(?o, " ' + term[0] + '","i") || regex(?o, "^' + term[0] + '","i"))'
+                    #regex += ' FILTER (regex(?o, " ' + term[:1] + '","i") || regex(?o, "^' + term[:1] + '","i"))'
+                else:
+                    regex += ' FILTER (regex(?o, "' + term + '","i")) '
+
         else:
             regex = ' FILTER (regex(?o, "' + self.val + '","i")) '
+
+        regex += ' FILTER ( langMatches(lang(?o),"en" )) '
 
         return regex
 
@@ -122,6 +148,12 @@ class SparqlQuery:
 
             for i in typelist:
                 typesandlabelslist.append("?s <" + label + "> ?o . ?s a <" + i + "> .")
+
+            if len(typelist) == 0:
+                for result in results["results"]["bindings"]:
+                    if result["p"]["value"] == 'http://geekscruff.me/ns/dataset#labelForPersonalName':
+                        typesandlabelslist.append("?s <" + result["o"]["value"] + "> ?o .")
+
         except Exception as e:
             logger.error("ERROR! sparql_query.py - " + e.message)
             raise Exception("Something went wrong in building the types and labels")

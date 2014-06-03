@@ -20,6 +20,7 @@ class EndpointsList():
         val = "?s <http://dublincore.org/documents/dcmi-terms/#elements-title> ?o"
         sel = sparql_select.SparqlSelect(val, conn.repourl(), 0, '?s ?o')
         sel.distinct()
+        sel.orderby("?o")
         conn.close()
         logger.debug("DEBUG endpointslist.py - return all names and uris")
         return sel.select()
