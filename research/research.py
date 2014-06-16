@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, session, request, redirect, url_fo
 import os
 import logging
 
+
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
@@ -12,6 +13,7 @@ app = Flask(__name__)
 research = Blueprint('research', __name__, template_folder='templates')
 
 @research.route('/query', defaults={'page': 'query'}, methods=['GET', 'POST'])
+@research.route('/explore', defaults={'page': 'explore'}, methods=['GET', 'POST'])
 @research.route('/create', defaults={'page': 'create'}, methods=['GET', 'POST'])
 @research.route('/<page>')
 def show(page):
@@ -75,6 +77,8 @@ def show(page):
                 # for a discard request, combine the existing discard options with the new ones
                 if request.form.get('discard', False):
                     session.pop('q', None)
+                    # this will fail if session exceeds a certain size, see http://stackoverflow.com/questions/15552418/flask-session-forgets-entry-between-requests
+                    # possible solution here http://flask-kvsession.readthedocs.org/en/0.2/
                     discards = session['discards']
                     discards += request.form.getlist('discard')
                     session['discards'] = discards
@@ -143,22 +147,12 @@ def show(page):
                         table += '<table class="resultstable">'
                         for result in results["results"]["bindings"]:
                             if result["o"]["value"] not in discards:
-                                table += '<tr><td>' + result["o"]["value"] + ' <span id="tiny">' \
-                                         '(id: <a href="' + result["s"]["value"] + '">' + result["s"]["value"] + '</a>)</span>'
-
-                                if session.get(result["s"]["value"]):
-                                    table += '<div><table class="more">'
-                                    for item in session[result["s"]["value"]]["results"]["bindings"]:
-                                        table += '<tr><td>' + item["p"]["value"] + '</td>' \
-                                            '<td>' + item["o"]["value"] + '</td></tr>'
-                                    table += '</table></div>'
-                                else:
-                                    table += '<form action="query" method=post>' \
-                                             '<input id="more" name="more" value="View More" type="submit">'\
-                                             '<input name="q" value="' + result["s"]["value"] + '" type="hidden">' \
-                                             '<input name="e" value="' + eps[count] + '" type="hidden">' \
-                                             '</form>'
-                                table += '</td><td style="width: 40px"><input type="checkbox" class="check" value="' + result["o"]["value"] + '" name="discard"></td></tr>'
+                                table += '<tr><td>' + result["o"]["value"] + \
+                                         ' <span id="tiny">More details: ' \
+                                         '<a target="_blank" href="' + result["s"]["value"] + '">' + result["s"]["value"] + '</a>' \
+                                         '</span></td><td style="width: 40px">' \
+                                         '<input type="checkbox" class="check" value="' + result["o"]["value"] + '" ' \
+                                         'name="discard"></td></tr>'
                         if "<td>" not in table:
                             table += '<tr><td>There are no results</td></tr></table><br /></div>'
                         else:
@@ -167,8 +161,11 @@ def show(page):
 
                         count += 1
 
-                d += '<br /><input type="checkbox" id="selectall">Select / Deselect all</input>' \
-                     '<br /><input type="submit" value="Discard checked items"></form>'
+                d += '<br /><br /><input class="right" type="checkbox" id="selectall" />' \
+                     '<label class="right">Select / Deselect all</label>' \
+                     '<br /><br /><input class="right styledbutton" type="submit" value="Discard checked items"></form>' \
+                     '<br /><form action="explore" method=post><br /><input ' \
+                     'class="right styledbutton" type="submit" value="Explore"></form>'
                 session['q'] = d
 
             # If the add new endpoint form has been used

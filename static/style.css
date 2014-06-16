@@ -73,13 +73,17 @@ table, td
                     border: 1px solid black;
                 }
 
-.more   {
-                    margin-left: 3%;
-                    margin-right: 3%;
-                    background: #f0d6d6;
-                    font-size 0.8em
-                }
+.styledbutton {
+    padding: 5px 5px 5px 5px ;
+    width: 15%;
+}
 
-.more td  {
-                    border: 1px solid grey;
-                }
+.styledtext {
+    padding: 5px 5px 5px 5px ;
+    width: 30%;
+}
+
+.right {
+
+    float: right;
+}

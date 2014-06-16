@@ -26,6 +26,7 @@ window.onload = function()
         //Add Button
         var add = document.createElement("input");
         add.setAttribute("type", "submit");
+        add.setAttribute("class", "styledbutton");
         add.setAttribute("value", "Add");
 
         document.addnew.button.setAttribute("type", "hidden");

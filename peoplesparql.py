@@ -4,11 +4,28 @@ from flask import Flask, request, session, g, abort, json
 from home.home import home
 from project.project import project
 from research.research import research
-import requests, logging, os.path
+import requests
+import logging
+import os.path
+
+from simplekv.memory import DictStore
+
+# This is currently made available locally as was not able to get this working via environment
+from flaskext.kvsession import KVSessionExtension
+
+# a DictStore will store everything in memory
+# other stores are more useful, like the FilesystemStore,
+# see the simplekv documentation for details
+store = DictStore()
+
 logger = logging.getLogger(__name__)
 
 # Get the app for use in setting up the config
 app = Flask(__name__)
+
+# Replace the app's session handling
+# Used because some of the sessions are larger than can be stored in the client browser
+KVSessionExtension(store, app)
 
 # Register the blueprints
 app.register_blueprint(home)

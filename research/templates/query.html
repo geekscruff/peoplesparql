@@ -15,23 +15,25 @@
 
         <p> {{ session['ep'] | safe }}
         </p>
+
+        <form action="query" method=get>
+            <input class="styledbutton" type=submit value="New Query">
+        </form>
         {% if session['q'] %}
             <h2>Results</h2>
 
             {{ session['q'] | safe }}
 
         {% endif %}
-        <br />
-        <form action="query" method=get>
-            <input type=submit value="New Query">
-        </form>
+
     {% else %}
         <p>
             Enter the name of the person you want to search for in the box below. You do not need to worry about word order or capitals.
         </p>
         <!-- The form simply passes an empty post back to the calling page. -->
         <form action="query" method=post>
-            <input name="term" type="text" />
+            <input class="styledtext" name="term" type="text" />
+            <input class="styledbutton" type=submit value=Search>
             <br /><br />
             Choose one or more query target(s):
             <br />
@@ -48,17 +50,13 @@
 
                 {% endif %}
             </table>
-            <!-- select all / clear all -->
-            <br />
-            <input type=submit value=Search>
         </form>
-   {% endif %}
-        <br /><br />
+        <br />
         <form id="addnew" name="addnew" action="query" method=post>
-            <input id="button" value="Add New Query Target" type="button">
+            <input class="styledbutton" id="button" value="Add New Query Target" type="button">
             <!-- we will use some javascript to show the text box -->
         </form>
-
-
-    <p></p>
+   {% endif %}
+        <br />
+        <br />
 {% endblock %}
