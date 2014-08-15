@@ -1,14 +1,158 @@
 <!-- The Explore Page -->
 {% extends "base.html" %}
-{% block title %}Query{% endblock %}
+{% block title %}Explore{% endblock %}
 {% block content %}
+
+<script src="{{ url_for('static', filename='explore.js') }}"></script>
+
 <h1>Explore</h1>
-{% if session['q'] %}
-        {{ session['q'] | safe }}
+<br />
+    <div class="debug">
+        Results:
+        {% if session['results'] %}
+            <img src="{{ url_for('static', filename='images/check-alt.png') }}" alt="TICK"/>
+        {% else %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/>
+        {% endif %}
+        <br />
+        Stored Data:
+        {% if session['store'] == 'yes' %}
+            <img src="{{ url_for('static', filename='images/check-alt.png') }}" alt="TICK"/>
+        {% elif  session['store'] == 'no'  %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/> - please <a href="#" class=signin>Sign in</a> and start the query again (sorry!)
+        {% else %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/>
+        {% endif %}
+        <br />
+        Same Person:
+        {% if session['sameperson'] %}
+            <img src="{{ url_for('static', filename='images/check-alt.png') }}" alt="TICK"/>
+        {% else %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/>
+        {% endif %}
+        <br />
+        Enhanced:
+        {% if session['enhance'] == 'yes' %}
+            <img src="{{ url_for('static', filename='images/check-alt.png') }}" alt="TICK"/><br />
+        {% elif session['enhance'] == 'no' %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/> - please <a href="#" class=signin>Sign in</a> and start the query again (sorry!)
+        {% else %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/>
+        {% endif %}
+        <br />
+        Clean Display
+        {% if session['dedup'] %}
+            <img src="{{ url_for('static', filename='images/check-alt.png') }}" alt="TICK"/>
+        {% else %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/>
+        {% endif %}
+
+    </div>
+    <br />
+    <form action="query" method=get>
+        <input class="styledbutton" type=submit value="New Query">
+    </form>
+     <br />
+
+    {% if session['results'] %}
+
+    <form action="explore" method=post>
+
+        <div class="res"><br />
+            {% if not session['dedup'] %}
+            <input type="button" class="more" value="More details"/>
+            <br /><br />
+            {% endif %}
+            <table class="resultstable">
+       {{ session['results'] | safe }}
+        </table><br /></div>
+
+        <br />
+        {% if session['sameas'] %}
+        <h2>SameAs</h2>
+            {{ session['sameastable'] | safe }}
+        {% endif %}
+        <br />
+
+        <!-- This is where we print messages -->
+
+        {% if session['enhance'] == 'fail' %}
+            <h3>Enhance from 'sameas' links</h3>
+            <p>Enhancement failed. Data could not be retrieved from any of the 'sameas' links. Please check your internet connection.</p>
+        {% endif %}
+
+
+        {% if session['sameperson'] %}
+        <h3>Are these the same person?</h3>
+        <p id="tiny">Please note, this is a proof of concept feature and currently only looks at the first two names.</p>
+            {% if session['confidence'] == None %}
+                <p>Not enough evidence found</p>
+            {% elif session['confidence'] == 0.0 %}
+                <p>Fairly sure NO</p>
+            {% elif session['confidence'] < 0.75 and session['confidence'] < 0.0 %}
+                <p>Less sure NO</p>
+            {% elif session['confidence'] == 1.0 %}
+                <p>Fairly sure YES</p>
+            {% elif session['confidence'] >= 0.75 and session['confidence'] < 1.0 %}
+                <p>Less sure YES</p>
+            {% endif %}
+
+        <div class="debug">
+            <h2>Details</h2>
+            {{ session['sameperson'] | safe }}
+        </div>
+        {% endif %}
+
+    <h3>Enhancement steps:</h3>
+
+    {% if not session['email'] %}
+        <p>please <a href="#" class=signin>Sign in</a> to use the enhancement steps.</p>
+        <br />
+    {% elif session['email'] %}
+        {% if not session['sameperson'] %}
+            <form action="explore" method=post>
+                <input type="hidden" name="sameperson" value="sameperson">
+                <input class="styledbutton" type=submit value="Are these the same person?">
+            </form>
+            <br />
+         {% endif %}
+
+        {% if session['sameas'] %}
+            <form action="explore" method=post>
+                <input type="hidden" name="enhance" value="enhance">
+                <input class="styledbutton" type=submit value="Enhance from external sources">  (using SameAs links)
+            </form>
+            <br />
+        {% endif %}
+
+        <!-- no idea why I need this but I seem to -->
+        {% if session['sameperson'] %}
+            <br />
+        {% endif %}
+
+        <form action="explore" method=post>
+            <input type="hidden" name="dedup" value="dedup">
+            <input class="styledbutton" type=submit value="Enhance with semantics"> (organise information by entity)
+        </form>
+
+
+    <h3>Save or Add Data:</h3>
+
+    <form action="explore" method=get>
+        <input type="hidden" name="save" value="save">
+        <input class="styledbutton" type=submit value="Save These People [not available]">
+    </form>
+
+    <br />
+    <form action="create" method=get>
+        <input type="hidden" name="add" value="add">
+        <input class="styledbutton" type=submit value="Add Local Information For Checked Person [not available]">
+    </form>
+    <br />
+    {% endif %}
+
     {% else %}
-<p>
-    TODO
-</p>
-{% endif %}
+        <p>Welcome to the explore page, please <a href="query">query</a> for a name and click the Explore button.</p>
+    {% endif %}
 
 {% endblock %}

@@ -3,27 +3,8 @@
 {% block title %}Create{% endblock %}
 {% block content %}
 <h1>Create</h1>
-{% if session['json'] %}
-<p>The query:</p>
-<pre>
-{{ session['query'] }}
-            </pre>
-<p>The data added:</p>
-{{ session['json'] | safe }}
-{% else %}
 
-{% if not session.logged_in %}
-<p>You need to login to add data. <a href="mailto:j.allinson@gmail.com">Contact me</a> for access.</p>
-{% else %}
+<p>This feature is not available.</p>
 
-<p>Add a person to the data store. Enter their name.</p>
-<p>
-<form action="create" method=post>
-    <input type="text" name="name"/>
-    <input type=submit value=Run />
-</form>
-</p>
-{% endif %}
-{% endif %}
 
 {% endblock %}

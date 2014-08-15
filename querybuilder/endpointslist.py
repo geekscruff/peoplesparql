@@ -18,9 +18,7 @@ class EndpointsList():
         conn = connect.Connect(repo)
         conn.repoconn()
         val = "?s <http://dublincore.org/documents/dcmi-terms/#elements-title> ?o"
-        sel = sparql_select.SparqlSelect(val, conn.repourl(), 0, '?s ?o')
-        sel.distinct()
-        sel.orderby("?o")
+        sel = sparql_select.SparqlSelect(val, conn.repourl(), sel='?s ?o', dist=True, order="?o")
         conn.close()
         logger.debug("DEBUG endpointslist.py - return all names and uris")
         return sel.select()
@@ -29,8 +27,7 @@ class EndpointsList():
         conn = connect.Connect(repo)
         conn.repoconn()
         val = "?s <http://dublincore.org/documents/dcmi-terms/#elements-title> ?o"
-        sel = sparql_select.SparqlSelect(val, conn.repourl(), 0, '?s')
-        sel.distinct()
+        sel = sparql_select.SparqlSelect(val, conn.repourl(), sel='?s', dist=True)
         conn.close()
         logger.debug("DEBUG endpointslist.py - return all uris")
         return sel.select()

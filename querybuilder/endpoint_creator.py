@@ -73,7 +73,7 @@ class EndpointCreator:
 
     # Select query to get info on the endpoint from the local datastores repo
     def selectforlocalendpoint(self):
-        return sparql_select.SparqlSelect("{ <http://geekscruff/ns/datasetservicedby#" + self.sparql + "> ?p ?o } UNION { <" + self.sparql + "> ?p ?o}", connect.Connect(self.repo).repourl(), 0, "?p ?o").select()
+        return sparql_select.SparqlSelect("{ <http://geekscruff/ns/datasetservicedby#" + self.sparql + "> ?p ?o } UNION { <" + self.sparql + "> ?p ?o}", connect.Connect(self.repo).repourl(), sel="?p ?o").select()
 
     # Discover and store information about the sparql endpoint
     def setupendpoint(self):
@@ -125,17 +125,17 @@ class EndpointCreator:
             added = "n"
             # Loop through our internal list of eleven personal name types
             for x in xrange(11):
-                res = sparql_select.SparqlSelect("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(x + 1) + ">", self.sparql, 1, "*").select()
+                res = sparql_select.SparqlSelect("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(x + 1) + ">", self.sparql, limit=1).select()
                 if "[]" not in str(res) and str(res) != "error":
                     added = "y"
                     add.adduri('http://rdfs.org/ns/void#sparqlEndpoint', self.sparql)
                     add.adduri('http://geekscruff.me/ns/dataset#typeForPersonalName', switch(x + 1))
 
                     # Check for rdfs:label and skos:prefLabel - assuming that one or other of these will be used, if not setup will fail
-                    label1 = sparql_select.SparqlSelect("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(x + 1) + "> . ?s http://www.w3.org/2000/01/rdf-schema#label ?o", self.sparql, 1, "?s").select()
+                    label1 = sparql_select.SparqlSelect("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(x + 1) + "> . ?s http://www.w3.org/2000/01/rdf-schema#label ?o", self.sparql, limit=1, sel="?s").select()
                     if "[]" not in str(label1) and str(label1) != "error":
                         add.adduri('http://geekscruff.me/ns/dataset#labelForPersonalName', 'http://www.w3.org/2000/01/rdf-schema#label')
-                    label2 = sparql_select.SparqlSelect("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(x + 1) + "> . ?s <http://www.w3.org/2004/02/skos/core#prefLabel> ?o", self.sparql, 1, "?s").select()
+                    label2 = sparql_select.SparqlSelect("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(x + 1) + "> . ?s <http://www.w3.org/2004/02/skos/core#prefLabel> ?o", self.sparql, limit=1, sel="?s").select()
                     if "[]" not in str(label2) and str(label2) != "error":
                         add.adduri('http://geekscruff.me/ns/dataset#labelForPersonalName', 'http://www.w3.org/2004/02/skos/core#prefLabel')
 

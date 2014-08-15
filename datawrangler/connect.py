@@ -1,9 +1,8 @@
 __author__ = 'geekscruff'
 
-from flask import current_app, Flask
+from flask import Flask
 from franz.openrdf.sail.allegrographserver import AllegroGraphServer
 from franz.openrdf.repository.repository import Repository
-import datawrangler
 import os
 import logging
 
@@ -13,9 +12,8 @@ app = Flask(__name__)
 
 # Creates the connection to the local repository
 
-
 class Connect():
-    def __init__(self, repository):  # Supply the repository name
+    def __init__(self, repository, cat='default', new=False):  # Supply the repository name
 
         # Load the configuration, we need the allegrograph connection information
         if os.path.isfile('/opt/peoplesparql/config.py'):
@@ -28,13 +26,24 @@ class Connect():
         logger.info('INFO connect.py - attempting connection to %s', repository)
         try:
             server = AllegroGraphServer(app.config['AG_HOST'], app.config['AG_PORT'], app.config['AG_USER'], app.config['AG_PASSWORD'])
-            self.catalog = server.openCatalog(app.config['AG_CATALOG'])
+            # public_catalog is default; supply a catalog value to use a different catalogue
+            if cat == 'default':
+                self.catalog = server.openCatalog(app.config['AG_CATALOG'])
+            else:
+                self.catalog = server.openCatalog(cat)
             self.accessMode = Repository.ACCESS
-            self.repo = self.catalog.getRepository(repository, self.accessMode)
+            # default is to use an existing repository
+            if not new:
+                self.repo = self.catalog.getRepository(repository, self.accessMode)
+            # if new is true, create a new repository (if it already exists, request is ignored and existing repo used)
+            else:
+                self.repo = self.catalog.createRepository(repository)
+                self.repo = self.catalog.getRepository(repository, self.accessMode)
+
             logger.info('INFO connect.py - connected to %s', self.reponame())
 
         except Exception as e:
-            logger.error('ERROR! connect.py - ' + e.message)
+            logger.error('ERROR! connect.py 1 - ' + e.message)
 
     # Returns the repository connection
     def repoconn(self):
@@ -43,21 +52,21 @@ class Connect():
             logger.debug('DEBUG connect.py -- return connection')
             return self.conn
         except Exception as e:
-            logger.error('ERROR! connect.py - ' + e.message)
+            logger.error('ERROR! connect.py 2 - ' + e.message)
 
     # Returns the repository name
     def reponame(self):
         try:
             return self.repo.getDatabaseName()
         except Exception as e:
-            logger.error('ERROR! connect.py - ' + e.message)
+            logger.error('ERROR! connect.py 3 - ' + e.message)
 
     # Returns the full url for the repository
     def repourl(self):
         try:
-            return "http://" + app.config['AG_HOST'] + ":" + str(app.config['AG_PORT']) + "/catalogs/" + app.config['AG_CATALOG'] + "/repositories/" + self.reponame()
+            return "http://" + app.config['AG_HOST'] + ":" + str(app.config['AG_PORT']) + "/catalogs/" + self.catalog.getName() + "/repositories/" + self.reponame()
         except Exception as e:
-            logger.error('ERROR! connect.py - ' + e.message)
+            logger.error('ERROR! connect.py 4 - ' + e.message)
 
 
     # Used for testing, delete all data if the repository name is 'test'
@@ -68,7 +77,7 @@ class Connect():
 
     # Close the repository connection
     def close(self):
+        logger.info('INFO connect.py - connection closed')
         self.repoconn().close();
         self.repo = self.conn.repository
         self.repo.shutDown()
-        logger.info('INFO connect.py - connection closed')

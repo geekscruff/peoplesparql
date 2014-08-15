@@ -7,6 +7,14 @@ def tryconn():
     testconnect = connect.Connect('test')
     return testconnect
 
+def tryconn_private():
+    testconnect = connect.Connect('test', cat='private-catalog')
+    return testconnect
+
+def tryconn_new():
+    testconnect = connect.Connect('test2', cat='public-catalog', new=True)
+    return testconnect
+
 class TestConnect(TestCase):
     def test_connect_name(self):
         conn = tryconn()
@@ -26,5 +34,15 @@ class TestConnect(TestCase):
     def test_delete_test(self):
         conn = tryconn()
         conn.deletetestdata()
+        self.assertEqual(conn.repoconn().size(), 0)
+        conn.close()
+
+    def test_set_catalog(self):
+        conn = tryconn_private()
+        self.assertEqual(conn.repoconn().size(), 0)
+        conn.close()
+
+    def test_create_repo(self):
+        conn = tryconn_new()
         self.assertEqual(conn.repoconn().size(), 0)
         conn.close()

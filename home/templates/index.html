@@ -2,30 +2,36 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-  <h1>People Sparql</h1>
+  <h1>Semantics-based Indexing of Historical Entities</h1>
   <p>
-    Welcome to the working prototype site for my MSc Project: Semantics-based Indexing of Historical Entities
+    Welcome to the prototype for my MSc Project: Semantics-based Indexing of Historical Entities
   </p>
-  <p>This site demonstrates the following:
+  <p>This is not a fully formed web site by any means.</p>
+  <p>The site demonstrates the following:
       <ul>
         <li>A basic python - flask website with blueprints</li>
         <li>Simple login to restrict access to certain features</li>
-        <li>Querying a selection of SPARQL endpoints using the SPARQLWrapper python library
+        <li>Querying for persons across a selection of SPARQL endpoints:
             <ul>
                 <li>British Museum</li>
                 <li>Archives Hub</li>
                 <li>British National Bibliography</li>
-                <li>DBPedia</li>
+                <li>DBPedia (Wikipedia)</li>
                 <li>... and more</li>
             </ul>
         </li>
-    <li>Querying for personal names across those endpoints, return a basic list of results</li>
+    <li>Basic list of results</li>
     <li>Discarding results</li>
-    <li>Adding new sparql endpoints (note, endpoints vary *a lot* so this does not always work).</li>
+    <li>Adding new sparql endpoints.</li>
+    <li>Exploring results in three ways:
+        <ul>
+                <li>Compare two names to see if they are the same person.</li>
+                <li>Pull in extra information where one of our resources exerts a 'sameas' relationship to an another resource</li>
+                <li>Building a semantic display of results (identifying the different 'types' of entity)</li>
 
-       <!-- <li>Querying local data, stored in AllegroGraph: a sample from the artworld.york.ac.uk dataset and data added in the 'create' tab</li>
-        <li>Creating basic triples using the agraph python client</li> -->
-      </ul>
+        </ul>
+    </li>
+  </ul>
   </p>
   <p>
       Code for the prototype is available on GitHub: https://github.com/geekscruff/peoplesparql

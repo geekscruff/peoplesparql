@@ -3,26 +3,86 @@
 {% block title %}Query{% endblock %}
 {% block content %}
 
+    <script src="{{ url_for('static', filename='query.js') }}"></script>
+
     <h1>Query</h1>
     <!--
     If there is a 'q' session variable, display the query result, otherwise show the search box.
     Using safe here will autoescape the html being passed in the session variable.
     -->
+
+    <div class="debug">
+            <p>Query entered
+        {% if session['query'] %}
+            <img src="{{ url_for('static', filename='images/check-alt.png') }}" alt="TICK"/>
+        {% else %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/>
+        {% endif %}
+        <br />Endpoints selected
+        {% if session['endpoints'] %}
+        <img src="{{ url_for('static', filename='images/check-alt.png') }}" alt="TICK"/>
+        {% else %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/>
+        {% endif %}
+        <br />Results returned
+        {% if session['resultslist'] %}
+            <img src="{{ url_for('static', filename='images/check-alt.png') }}" alt="TICK"/>
+        {% else %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/>
+        {% endif %}
+        <br />Items discarded
+        {% if session['discards'] %}
+            <img src="{{ url_for('static', filename='images/check-alt.png') }}" alt="TICK"/>
+
+        {% else %}
+            <img src="{{ url_for('static', filename='images/cancel.png') }}" alt="CROSS"/>
+        {% endif %}
+        </p>
+        </div>
+
+    {% if session['email'] %}
+    {% else %}
+        <p>Please <a href="#" class=signin>Sign in</a>. It should only take a moment to set-up with a google account.</p>
+    {% endif %}
+
     {% if session['query'] %}
         <p>
+            You searched for:<br />
         {{ session['query'] | safe }}
         </p>
-
-        <p> {{ session['ep'] | safe }}
+        <p>
+            {{ session['epselect'] | safe }}
         </p>
 
         <form action="query" method=get>
             <input class="styledbutton" type=submit value="New Query">
         </form>
-        {% if session['q'] %}
+        {% if session['results'] %}
             <h2>Results</h2>
 
-            {{ session['q'] | safe }}
+            <form action="query" method=post>
+
+            {{ session['results'] | safe }}
+
+                <br /><br />
+                <input class="right" type="checkbox" id="selectall" />
+                <label class="right">Select / Deselect all</label>
+                <br /><br />
+                <input class="right styledbutton" type="submit" value="Discard checked items" />
+            </form>
+
+            {% if session['discards'] %}
+            <br /><br />
+            <form action="query" method=post>
+                <input type="hidden" name="cancel" value="cancel">
+                <input class="right styledbutton" type="submit" value="Return discarded selection" />
+            </form>
+            {% endif %}
+
+            <br /><br />
+            <form action="explore" method=post>
+                <input class="styledbutton" type="submit" value="Explore (all visible results)" />
+            </form>
 
         {% endif %}
 
@@ -37,12 +97,11 @@
             <br /><br />
             Choose one or more query target(s):
             <br />
-            <!-- TODO Find a cleaner way to populate this list -->
 
             <table>
-                {% if session['epl'] %}
+                {% if session['endpointslist'] %}
 
-                {{ session['epl'] | safe }}
+                {{ session['endpointslist'] | safe }}
 
                 {% else %}
 
@@ -57,6 +116,5 @@
             <!-- we will use some javascript to show the text box -->
         </form>
    {% endif %}
-        <br />
         <br />
 {% endblock %}

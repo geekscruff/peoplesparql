@@ -1,6 +1,6 @@
 __author__ = 'geekscruff'
 
-from flask import Flask, request, session, g, abort, json
+from flask import Flask, request, session, g, abort, json, render_template
 from home.home import home
 from project.project import project
 from research.research import research
@@ -57,6 +57,7 @@ AG_PORT = 10035 # assuming standard installation
 AG_CATALOG = 'public-catalog' # this needs to exist in local allegrograph
 AG_USER = 'test' # this needs to exist as use in local allegrograph with read/write access to 'test'
 AG_PASSWORD = '1234' # this needs to be the right password in local allegrograph
+GOOGLE_API_KEY = 'AIzaSyBTbOXOqynBvRbBy12hMz1KxxNLBpo45R4'
 
 # Check for the production config file and load. If it is missing load the configuration from the current object.
 if os.path.isfile('/opt/peoplesparql/config.py'):
@@ -82,6 +83,8 @@ def config():
 # User login provided by the Flask persona example: https://github.com/mitsuhiko/flask/tree/master/examples/persona
 @app.before_request
 def get_current_user():
+    if app.config['TESTING']:
+        session['email'] = 'testuser@example.com'
     g.user = None
     email = session.get('email')
     if email is not None:
@@ -105,6 +108,7 @@ def login_handler():
 
     abort(400)
 
+
 @app.route('/_auth/logout', methods=['POST'])
 def logout_handler():
     """This is what persona.js will call to sign the user
@@ -112,6 +116,11 @@ def logout_handler():
     """
     session.clear()
     return 'OK'
+
+# ??? create blueprint see http://stackoverflow.com/questions/12768825/flask-error-handler-for-blueprints
+@app.errorhandler(500)
+def error(e):
+    return render_template('500.html'), 500
 
 if __name__ == '__main__':
     app.run()
