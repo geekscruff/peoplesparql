@@ -1,5 +1,7 @@
 __author__ = 'geekscruff'
 
+"""This class is used to create endpoints of different types. Currently only sparql is supported."""
+
 from flask import Flask
 import endpoint_creator
 import os
@@ -8,9 +10,6 @@ import logging
 # Global variables
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
-
-#This class is used to create endpoints of different types. Currently only sparql is supported.
-
 
 class Endpoint:
     def __init__(self, ep):
@@ -53,9 +52,6 @@ class Endpoint:
             logger.error("ERROR! endpoint.py -- " + e.message)
             raise Exception(e.message)
 
-    def setup_opensearch_endpoint(self):
-        return "TODO"
-
     def setdetails(self, d):
         logger.debug("DEBUG endpoint.py - store the JSON results")
         self.details = d
@@ -63,9 +59,3 @@ class Endpoint:
     def getdetails(self):
         logger.debug("DEBUG endpoint.py - return the endpoint details as JSON results")
         return self.details
-
-    # Not yet implemented (may not be needed)
-    def geturi(self):
-        #parse the json and get the uri
-        return "uri"
-

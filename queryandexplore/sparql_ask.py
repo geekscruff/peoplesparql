@@ -1,13 +1,14 @@
 __author__ = 'geekscruff'
 
+
+"""Perform an ASK query on the specified endpoint, with the specified value"""
+
 from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions, XML
 from simplejson import JSONDecodeError
 from urllib2 import HTTPError
 import logging
 
 logger = logging.getLogger(__name__)
-
-# Perform an ASK query on the specified endpoint, with the specified value
 
 
 class SparqlAsk():

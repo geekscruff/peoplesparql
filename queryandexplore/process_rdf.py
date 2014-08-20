@@ -1,5 +1,8 @@
 __author__ = 'geekscruff'
 
+"""Sits between the interface and the rdflib classes """
+
+
 from flask import Flask
 from rdflib.graph import ConjunctiveGraph, Graph
 import urllib
@@ -14,15 +17,15 @@ app = Flask(__name__)
 
 class ProcessRdf():
     def __init__(self):
-        logger.info("INFO processrdf.py - object instantiated")
+        logger.info("INFO process_rdf.py - object instantiated")
         self.uri = ''
 
         # Load the configuration, we need the allegrograph connection information
         if os.path.isfile('/opt/peoplesparql/config.py'):
-            logger.info("INFO processrdf.py - loaded production config")
+            logger.info("INFO process_rdf.py - loaded production config")
             app.config.from_pyfile('/opt/peoplesparql/config.py', silent=False)
         else:
-            logger.info("INFO processrdf.py - loaded local config")
+            logger.info("INFO process_rdf.py - loaded local config")
             app.config.from_object('peoplesparql')
 
     def fromuri(self, uri):
@@ -36,21 +39,21 @@ class ProcessRdf():
                 g.load(self.uri)
 
                 if g:
-                    logger.info("INFO processrdf.py - returning graph for " + self.uri)
+                    logger.info("INFO process_rdf.py - returning graph for " + self.uri)
                     return g
 
                 else:
                     raise Exception('Nothing was returned, probably caused URL serving no RDF or bad RDF (eg. Freebase): '
-                                    '"No handlers could be found for logger "processrdf.py" -- uri was ' + self.uri)
+                                    '"No handlers could be found for logger "process_rdf.py" -- uri was ' + self.uri)
 
             except URLError as e:
-                logger.error("URLError processrdf.py - " + e.message)
+                logger.error("URLError process_rdf.py - " + e.message)
                 raise Exception('URLError, cause either bad URL or no internet connection - ' + e.message + '(uri was ' + self.uri + ')')
             except SAXParseException as e:
-                logger.error("SAXParseException processrdf.py - " + e.message + '(uri was' + self.uri + ')')
+                logger.error("SAXParseException process_rdf.py - " + e.message + '(uri was' + self.uri + ')')
                 raise Exception('SAXParseException')
             except AttributeError as e:
-                logger.error("AttributeError processrdf.py - " + e.message + '(uri was' + self.uri + ')')
+                logger.error("AttributeError process_rdf.py - " + e.message + '(uri was' + self.uri + ')')
                 raise Exception('AttributeError')
         else:
             self.fromfreebaseuri()
@@ -77,28 +80,28 @@ class ProcessRdf():
                 g.parse(self.uri)
 
                 if g:
-                    logger.info("INFO processrdf.py - returning graph for " + self.uri)
+                    logger.info("INFO process_rdf.py - returning graph for " + self.uri)
                     return g
 
                 else:
                     raise Exception('Nothing was returned, probably caused URL serving no RDF or bad RDF (eg. Freebase): '
-                                    '"No handlers could be found for logger "processrdf.py" -- uri was ' + self.uri)
+                                    '"No handlers could be found for logger "process_rdf.py" -- uri was ' + self.uri)
 
             except URLError as e:
-                logger.error("URLError processrdf.py - " + e.message)
+                logger.error("URLError process_rdf.py - " + e.message)
                 raise Exception('URLError, cause either bad URL or no internet connection - ' + e.message + '(uri was ' + self.uri + ')')
             except SAXParseException as e:
-                logger.error("SAXParseException processrdf.py - " + e.message + '(uri was' + self.uri + ')')
+                logger.error("SAXParseException process_rdf.py - " + e.message + '(uri was' + self.uri + ')')
                 raise Exception('SAXParseException')
             except AttributeError as e:
-                logger.error("AttributeError processrdf.py - " + e.message + '(uri was' + self.uri + ')')
+                logger.error("AttributeError process_rdf.py - " + e.message + '(uri was' + self.uri + ')')
                 raise Exception('AttributeError')
         else:
             self.fromfreebaseuri()
 
     # this doesn't do anything at the moment
     def fromfreebaseuri(self):
-        logger.error("ERROR processrdf.py - freebase uris are not currently supported - " + self.uri)
+        logger.error("ERROR process_rdf.py - freebase uris are not currently supported - " + self.uri)
 
         # freebase api doco https://developers.google.com/freebase/v1/getting-started#api-keys
         # need to register a google public api key
@@ -119,7 +122,7 @@ class ProcessRdf():
         # url = service_url + topic_id + '?' + urllib.urlencode(params)
         #
         # # this will fail due to freebase data containing full stops
-        # # solution wuold be to read it in and re-process
+        # # solution would be to read it in and re-process
         # g = ConjunctiveGraph()
         # g.load(url)
 

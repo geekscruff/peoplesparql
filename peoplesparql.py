@@ -1,5 +1,7 @@
 __author__ = 'geekscruff'
 
+"""This is the main class for the peoplesparql application."""
+
 from flask import Flask, request, session, g, abort, json, render_template
 from home.home import home
 from project.project import project
@@ -10,12 +12,11 @@ import os.path
 
 from simplekv.memory import DictStore
 
-# This is currently made available locally as was not able to get this working via environment
+# This is currently made available locally as I was not able to get this working via environment
 from flaskext.kvsession import KVSessionExtension
 
-# a DictStore will store everything in memory
-# other stores are more useful, like the FilesystemStore,
-# see the simplekv documentation for details
+"""a DictStore will store everything in memory; other stores may be more useful,
+like the FilesystemStore, see the simplekv documentation for details"""
 store = DictStore()
 
 logger = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ AG_PORT = 10035 # assuming standard installation
 AG_CATALOG = 'public-catalog' # this needs to exist in local allegrograph
 AG_USER = 'test' # this needs to exist as use in local allegrograph with read/write access to 'test'
 AG_PASSWORD = '1234' # this needs to be the right password in local allegrograph
-GOOGLE_API_KEY = 'AIzaSyBTbOXOqynBvRbBy12hMz1KxxNLBpo45R4'
+GOOGLE_API_KEY = 'changeme' # not currently used
 
 # Check for the production config file and load. If it is missing load the configuration from the current object.
 if os.path.isfile('/opt/peoplesparql/config.py'):
@@ -75,20 +76,21 @@ else:
 
 logger.info('INFO peoplesparql.py - logging Level ' + app.config['LOGLEVEL'])
 
+
 # This is used to test if the app is in test or production mode
 @app.route('/config')
 def config():
     return "TESTING " + str(app.config['TESTING']) + "<br />DEBUG " + str(app.config['DEBUG'])
 
+
 # User login provided by the Flask persona example: https://github.com/mitsuhiko/flask/tree/master/examples/persona
 @app.before_request
 def get_current_user():
-    if app.config['TESTING']:
-        session['email'] = 'testuser@example.com'
     g.user = None
     email = session.get('email')
     if email is not None:
         g.user = email
+
 
 @app.route('/_auth/login', methods=['GET', 'POST'])
 def login_handler():
@@ -117,10 +119,11 @@ def logout_handler():
     session.clear()
     return 'OK'
 
-# ??? create blueprint see http://stackoverflow.com/questions/12768825/flask-error-handler-for-blueprints
+# Handle HTTP 400 errors by directing to a custom error page
 @app.errorhandler(500)
 def error(e):
     return render_template('500.html'), 500
 
+# And finally, run!
 if __name__ == '__main__':
     app.run()

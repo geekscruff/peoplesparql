@@ -1,7 +1,7 @@
 __author__ = 'geekscruff'
 
 from unittest import TestCase
-from querybuilder import sparql_ask
+from queryandexplore import sparql_ask
 
 
 class TestAsk(TestCase):

@@ -1,12 +1,14 @@
 __author__ = 'geekscruff'
 
-from querybuilder import endpointslist, sparql_query, endpoint
-from datawrangler import processrdf, query_private, connect, delete_triples, same_person
-from flask import Blueprint, render_template, session, request, redirect, url_for, Flask, current_app
-from franz.openrdf.repository.repositoryconnection import RDFFormat
+"""the blueprint for handling query, explore and create pages"""
+
+import same_person
+from queryandexplore import endpoints_list, sparql_query_specific, endpoint, process_rdf
+from datawrangler import connect, delete_triples
+from flask import Blueprint, render_template, session, request, Flask
 import os
 import logging
-import buildresults
+import build_explore_results
 import json
 import re
 
@@ -43,7 +45,7 @@ def show(page):
         try:
             logger.debug("DEBUG research.py -- using repository: " + app.config['AG_DATASOURCES'])
             # Get a list of endpoints to populate the list on the query page
-            endpoints = endpointslist.EndpointsList().listall(app.config['AG_DATASOURCES'])
+            endpoints = endpoints_list.EndpointsList().listall(app.config['AG_DATASOURCES'])
 
             # Build up the table to return to the query page as session['endpointslist']
             for result in endpoints["results"]["bindings"]:
@@ -120,7 +122,7 @@ def show(page):
                     session['epselect'] = "In:<br />" # endpoint names
 
                     #get list of endpoint uris to query against
-                    results = endpointslist.EndpointsList().listalluris(app.config['AG_DATASOURCES'])
+                    results = endpoints_list.EndpointsList().listalluris(app.config['AG_DATASOURCES'])
 
                     for result in results["results"]["bindings"]:
                         # if the endpoint was seledcted add it to the eps list
@@ -144,7 +146,7 @@ def show(page):
                     for e in eps:
                         # TODO extend query options, get the AND from a form variable
                         # Run the name search
-                        res = sparql_query.SparqlQuery('AND', e).namesearch(request.form['term'])
+                        res = sparql_query_specific.SparqlQuery('AND', e).namesearch(request.form['term'])
 
                         if res not in resultslist:
                             resultslist.append(res)
@@ -233,13 +235,13 @@ def show(page):
         session.pop('query', None)
 
         if not session.get('enhance') and not session.get('store'):
-            buildresults.BuildResults('explore')
+            build_explore_results.BuildResults('explore')
 
         if request.method == 'POST':
 
             if request.form.get('dedup', False):
                 session['dedup'] = 'yes'
-                buildresults.BuildResults('dedup')
+                build_explore_results.BuildResults('dedup')
 
             elif request.form.get('enhance', False):
                 session.pop('enhance', None)
@@ -255,7 +257,7 @@ def show(page):
                         try:
                             if not re.match('^http\:\/\/\w\w\.dbpedia\.org', str(s)):
                                 if not re.match('^http\:\/\/\w\w\w\.dbpedia\.org', str(s)):
-                                    g = processrdf.ProcessRdf().fromuri(s)
+                                    g = process_rdf.ProcessRdf().fromuri(s)
                                     results = g.query('SELECT * {<' + s + '> ?p ?o . ?s ?p ?o} ORDER BY ?p')
                                     resultslist = g.query('select distinct ?s ?l { <' + s + '> ?p ?o . ?s ?p ?o . OPTIONAL { <' + s + '> rdfs:label ?l } }')
 
@@ -287,7 +289,7 @@ def show(page):
                     if enhancelist:
                         session['store'] = 'yes'
                         session['enhancelist'] = enhancelist
-                        buildresults.BuildResults('enhance')
+                        build_explore_results.BuildResults('enhance')
                     #if the list is empty
                     else:
                         session['enhance'] = 'fail'
@@ -299,21 +301,20 @@ def show(page):
 
 
             elif request.form.get('sameperson', False):
-                #TODO how to work through inner results
 
                 #To find out how many items there are in the results list
+                # not using this at the moment
                 count = 0
                 for res in session['resultslist']:
                     for r in res["results"]["bindings"]:
                         count += 1
-                # not using this at the moment
 
                 # sameperson count return the confidence, sameas, then replaced by names, then dates
                 # then combine
                 # need to pass the number to start at, so each number up to one less than the count
                 # also need to pass the number to end at
                 # ie 1,2, 1,3, 1,4 etc. then 2,3, then 3,4
-                #  14 results would take
+                # 14 results would take
                 # default will be
 
                 listp = session['resultslist']
@@ -334,7 +335,7 @@ def show(page):
                 discards = session['discards']
                 discards += request.form.getlist('discard')
                 session['discards'] = discards
-                buildresults.BuildResults('explore')
+                build_explore_results.BuildResults('explore')
 
 
     return render_template('%s.html' % page)

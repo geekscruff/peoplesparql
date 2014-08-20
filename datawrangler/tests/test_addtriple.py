@@ -1,14 +1,14 @@
 __author__ = 'geekscruff'
 
 from unittest import TestCase
-from datawrangler import addtriple, connect
+from datawrangler import add_triple, connect
 
 def tryconnect():
     testconnect = connect.Connect('test1').repoconn()
     return testconnect
 
 def tryadd(tc):
-    testadd = addtriple.AddTriple(tc)
+    testadd = add_triple.AddTriple(tc)
     testadd.setupsubject('http://dbpedia.org/void/Dataset')
     testadd.adduri('http://geekscruff.me/ns/dataset#typeForPersonalName', 'http://xmlns.com/foaf/0.1/Person')
     testadd.addliteral('http://xmlns.com/foaf/0.1/name', 'Some Name')
@@ -25,7 +25,7 @@ class TestAdd(TestCase):
     def test_add_triples_error(self):
         tc = tryconnect()
         size = tc.size()
-        testadd = addtriple.AddTriple(tc)
+        testadd = add_triple.AddTriple(tc)
         testadd.setupsubject('http://dbpedia.org/void/Dataset')
         testadd.adduri('geekscruff.me/ns/dataset#typeForPersonalName', 'dafghgxmlns.com/foaf/0.1/Person')
         self.assertEqual(size, tc.size())
@@ -33,7 +33,7 @@ class TestAdd(TestCase):
     def test_add_triples_context(self):
         tc = tryconnect()
         size = tc.size()
-        testadd = addtriple.AddTriple(tc)
+        testadd = add_triple.AddTriple(tc)
         contexts = '<http://geekscruff.me/context1>'
         testadd.setcontexts(contexts)
         testadd.setupsubject('http://geekscruff.me/Dataset')

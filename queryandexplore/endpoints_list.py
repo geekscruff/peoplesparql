@@ -1,18 +1,17 @@
 __author__ = 'geekscruff'
 
-from querybuilder import sparql_select
+"""Return a list of all endpoints in the local datastores repository, two methods,
+return all (name and uri) or just return uris"""
+
+from queryandexplore import sparql_select
 from datawrangler import connect
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Return a list of all endpoints in the local datastores repository, two methods,
-# return all (name and uri) or just return uris
-
-
 class EndpointsList():
     def __init__(self):
-        logger.debug("DEBUG endpointslist.py - object instantiated")
+        logger.debug("DEBUG endpoints_list.py - object instantiated")
 
     def listall(self, repo):
         conn = connect.Connect(repo)
@@ -20,7 +19,7 @@ class EndpointsList():
         val = "?s <http://dublincore.org/documents/dcmi-terms/#elements-title> ?o"
         sel = sparql_select.SparqlSelect(val, conn.repourl(), sel='?s ?o', dist=True, order="?o")
         conn.close()
-        logger.debug("DEBUG endpointslist.py - return all names and uris")
+        logger.debug("DEBUG endpoints_list.py - return all names and uris")
         return sel.select()
 
     def listalluris(self, repo):
@@ -29,5 +28,5 @@ class EndpointsList():
         val = "?s <http://dublincore.org/documents/dcmi-terms/#elements-title> ?o"
         sel = sparql_select.SparqlSelect(val, conn.repourl(), sel='?s', dist=True)
         conn.close()
-        logger.debug("DEBUG endpointslist.py - return all uris")
+        logger.debug("DEBUG endpoints_list.py - return all uris")
         return sel.select()

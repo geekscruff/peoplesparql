@@ -13,7 +13,7 @@ project = Blueprint('project', __name__, template_folder='templates')
 @project.route('/<page>')
 def show(page):
     try:
-        logger.debug('DEBUG project.py - show the project page')
+        logger.info('INFO project.py - showing the project page')
         return render_template('project/%s.html' % page)
     except TemplateNotFound as e:
         logger.error('TemplateNotFound project.py - ' + e.message)

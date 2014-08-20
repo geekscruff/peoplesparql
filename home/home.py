@@ -17,7 +17,7 @@ def page_not_found(e):
 @home.route('/<page>')
 def show(page):
     try:
-        logger.debug('DEBUG home.py - show the homepage')
+        logger.info('INFO home.py - showing the homepage')
         return render_template('%s.html' % page)
     except TemplateNotFound as e:
         logger.error('TemplateNotFound home.py - ' + e.message)

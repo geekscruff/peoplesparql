@@ -1,9 +1,11 @@
 __author__ = 'geekscruff'
 
+"""This class is a helper for research.py - it builds and returns results for the different 'explore' options"""
+
 from flask import session
 import logging
-from datawrangler import addtriple, connect, query_private, processrdf
-from querybuilder import endpointslist, sparql_query, endpoint
+from datawrangler import add_triple, connect
+from queryandexplore import sparql_query_specific, process_rdf, sparql_query_private
 import rfc3987
 import re
 from guess_language import guessLanguageName
@@ -17,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class BuildResults:
     def __init__(self, type):
-        logger.debug("DEBUG buildresults.py -- object instantiated")
+        logger.debug("DEBUG build_explore_results.py -- object instantiated")
         self.sameas = []
         if type == 'explore':
             self.buildexploreresults()
@@ -29,15 +31,16 @@ class BuildResults:
             self.builddedupresults()
             self.buildsameastable()
 
+    # build the basic explore results
     def buildexploreresults(self):
-        logger.debug("DEBUG buildresults.py -- buildexploreresults")
+        logger.debug("DEBUG build_explore_results.py -- buildexploreresults")
         conn = connect.Connect('tmp', cat='private-catalog').repoconn()
 
         try:
             count = 0
             resultslist = session['resultslist']
             eps = session['endpoints']
-            # We want a different display for the results, so re-write them here
+            # We want a different display for the results in 'explore', so re-write them here
             table = ''
             for results in resultslist:
                 for result in results["results"]["bindings"]:
@@ -51,18 +54,16 @@ class BuildResults:
 
                         # If the user is logged in, store results in tmp catalog
                         if session.get('email'):
-                            addnew = addtriple.AddTriple(conn)
+                            addnew = add_triple.AddTriple(conn)
                             context = '<http://geekscruff.me/tmp#' + session['email'] + '>'
                             addnew.setcontexts([context])
-                            logger.debug("DEBUG buildresults.py -- set context " + context)
+                            logger.debug("DEBUG build_explore_results.py -- set context " + context)
                             addnew.setupsubject(result["s"]["value"])
                             session['store'] = 'yes'
                         else:
                             session['store'] = 'no'
 
-                        for res in \
-                                sparql_query.SparqlQuery('AND', eps[count]).allsearch(result["s"]["value"], 'literal')[
-                                    "results"]["bindings"]:
+                        for res in sparql_query_specific.SparqlQuery('AND', eps[count]).allsearch(result["s"]["value"], 'literal')["results"]["bindings"]:
 
                             if session.get('email'):
                                 addnew.addliteral(res["p"]["value"], res["o"]["value"])
@@ -77,7 +78,7 @@ class BuildResults:
                                 table += res["o"]["value"] + '</td></tr>'
 
                         for res in \
-                                sparql_query.SparqlQuery('AND', eps[count]).allsearch(result["s"]["value"], 'uri')[
+                                sparql_query_specific.SparqlQuery('AND', eps[count]).allsearch(result["s"]["value"], 'uri')[
                                     "results"]["bindings"]:
 
                             if session.get('email'):
@@ -108,8 +109,9 @@ class BuildResults:
             session.pop('store', None)
             session.pop('epselect', None)
 
+    # build the 'enhanced' list
     def buildenhancedresults(self):
-        logger.debug("DEBUG buildresults.py -- buildenhancedresults")
+        logger.debug("DEBUG build_explore_results.py -- buildenhancedresults")
         table = session['results']
         session.pop('sameas')
         self.sameas = []
@@ -124,10 +126,10 @@ class BuildResults:
                 #If the user is logged in, store results in tmp catalog
                 if session.get('email'):
 
-                    addnew = addtriple.AddTriple(conn)
+                    addnew = add_triple.AddTriple(conn)
                     context = '<http://geekscruff.me/tmp#' + session['email'] + '>'
                     addnew.setcontexts([context])
-                    logger.debug("DEBUG buildresults.py -- set context " + context)
+                    logger.debug("DEBUG build_explore_results.py -- set context " + context)
 
                     if 'sameas' in result["p"]["value"] or 'sameAs' in result["p"]["value"]:
                         try:
@@ -135,7 +137,7 @@ class BuildResults:
                                 if not re.match('^http\:\/\/\w\w\w\.dbpedia\.org', str(result["o"]["value"])):
                                     self.sameas.append(result["o"]["value"])
                         except UnicodeEncodeError as e:
-                                logger.error('UnicodeEncodeError - buildresults.py: ' + e.message)
+                                logger.error('UnicodeEncodeError - build_explore_results.py: ' + e.message)
 
                     addnew.setupsubject(result["s"]["value"])
                     # we want to only include english, guess language does a good job on short paragraphs
@@ -151,7 +153,7 @@ class BuildResults:
                                         addnew.addliteral(result["p"]["value"], result["o"]["value"])
 
                             except UnicodeEncodeError as e:
-                                logger.error('UnicodeEncodeError - buildresults.py: ' + e.message)
+                                logger.error('UnicodeEncodeError - build_explore_results.py: ' + e.message)
                     else:
                         if not re.match('^http\:\/\/\w\w\.dbpedia\.org', str(result["o"]["value"])):
                             if not re.match('^http\:\/\/\w\w\w\.dbpedia\.org', str(result["o"]["value"])):
@@ -170,7 +172,7 @@ class BuildResults:
                             if not re.match('^http\:\/\/\w\w\w\.dbpedia\.org', str(result["o"]["value"])):
                                 self.sameas.append(result["o"]["value"])
                     except UnicodeEncodeError as e:
-                         logger.error('UnicodeEncodeError - buildresults.py: ' + e.message)
+                         logger.error('UnicodeEncodeError - build_explore_results.py: ' + e.message)
 
                 try:
                     if not re.match('^http\:\/\/\w\w\.dbpedia\.org', str(result["s"]["value"])):
@@ -196,16 +198,16 @@ class BuildResults:
 
                         lastone = result["s"]["value"]
                 except UnicodeEncodeError as e:
-                    logger.error('UnicodeEncodeError - buildresults.py: ' + e.message)
+                    logger.error('UnicodeEncodeError - build_explore_results.py: ' + e.message)
 
         # finish the very last one
         table += '</table></div><br /></span></td></tr>'
 
         session['results'] = table
 
-
+    # build the cleaned up enhanced results
     def builddedupresults(self):
-        logger.debug("DEBUG buildresults.py -- builddedupresults")
+        logger.debug("DEBUG build_explore_results.py -- builddedupresults")
         conn = connect.Connect('tmp', cat="private-catalog").repoconn()
 
         resultslist = session['resultslist']
@@ -229,13 +231,13 @@ class BuildResults:
                         query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' \
                                 'SELECT DISTINCT ?l FROM <http://geekscruff.me/tmp#' + session[
                                     'email'] + '> WHERE { <' + r["s"]["value"] + '> rdfs:label ?l'
-                        results = query_private.QueryPrivate(conn, query + ' }').query()
+                        results = sparql_query_private.QueryPrivate(conn, query + ' }').query()
                         if len(results) == 1:
                             for label in results:
                                 table += label.getValue('l').getValue() + '<br />'
                         elif len(results) > 1:
                             query += '. FILTER langMatches(lang(?l),"en" )'
-                            res = query_private.QueryPrivate(conn, query + ' }').query()
+                            res = sparql_query_private.QueryPrivate(conn, query + ' }').query()
                             if len(results) != 0:
                                 for lab in res:
                                     table += lab.getValue('l').getValue() + '<br />'
@@ -251,8 +253,10 @@ class BuildResults:
                                     "value"] + '> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?o } MINUS {<' + \
                                 r["s"]["value"] + '> <http://dbpedia.org/ontology/wikiPageExternalLink> ?o } }'
 
-                        results = query_private.QueryPrivate(conn, query).query()
+                        results = sparql_query_private.QueryPrivate(conn, query).query()
 
+                        # fetch the rdf and process
+                        # TODO this is very slow, so more thought on optimization is needed
                         for res in results:
                             try:
                                 # this will skip anything that times out after 0.5s
@@ -260,6 +264,7 @@ class BuildResults:
 
                                 try:
                                     # hardcoded this in as links to bbc's 'your painting' were taking a minute
+                                    # and we know they don't have rdf
                                     if 'bbc' not in res.getValue('o').getValue():
                                         #let's skip all non root dbpedia results
                                         if not re.match('^http\:\/\/\w\w\.dbpedia\.org', str(res.getValue('o').getValue())):
@@ -267,9 +272,9 @@ class BuildResults:
 
                                                 if 'http://data.linkedmdb.org/resource' in str(res.getValue('o').getValue()):
                                                     uri = str(res.getValue('o').getValue()).replace('resource', 'data')
-                                                    graph = processrdf.ProcessRdf().fromuri(uri)
+                                                    graph = process_rdf.ProcessRdf().fromuri(uri)
                                                 else:
-                                                    graph = processrdf.ProcessRdf().fromuri(res.getValue('o').getValue())
+                                                    graph = process_rdf.ProcessRdf().fromuri(res.getValue('o').getValue())
 
                                                 path = '/home/geekscruff/tmp.rdf'
 
@@ -285,18 +290,18 @@ class BuildResults:
                                                              serverSide=True)
 
                                 except Exception as e:
-                                    logger.error('ERROR! -- buildresults.py: skip this one, message: ')
+                                    logger.error('ERROR! -- build_explore_results.py: skip this one, message: ')
                                     logger.error(e.message)
                                     table += '</td></tr>'
 
                             except Exception as e:
-                                logger.error('ERROR! -- buildresults.py: skip this one, message: ')
+                                logger.error('ERROR! -- build_explore_results.py: skip this one, message: ')
                                 logger.error(e.message)
 
                         # Show basic info
                         query = 'SELECT DISTINCT ?p ?l FROM <http://geekscruff.me/tmp#' + session['email'] + '> WHERE { <' + \
                                 r["s"]["value"] + '> ?p ?l . FILTER ((isLiteral(?l))) }'
-                        info = query_private.QueryPrivate(conn, query).query()
+                        info = sparql_query_private.QueryPrivate(conn, query).query()
 
                         if info:
                             table += '<tr><td colspan="2"><h4>BASIC INFO</h4></td></tr>'
@@ -313,7 +318,7 @@ class BuildResults:
                         if 'dbpedia' in r["s"]["value"]:
                             query += '. FILTER langMatches(lang(?l),"en" )'
                         query += '} }'
-                        people = query_private.QueryPrivate(conn, query).query()
+                        people = sparql_query_private.QueryPrivate(conn, query).query()
 
                         if people:
                             table += '<tr><td colspan="2"><h4>RELATED PEOPLE, GROUPS AND ORGANISATIONS</h4></td></tr>'
@@ -334,7 +339,7 @@ class BuildResults:
                         if 'dbpedia' in r["s"]["value"]:
                             query += '. FILTER langMatches(lang(?l),"en" )'
                         query += '} }'
-                        places = query_private.QueryPrivate(conn, query).query()
+                        places = sparql_query_private.QueryPrivate(conn, query).query()
                         if places:
                             table += '<tr><td><h4>RELATED PLACES</h4></td></tr>'
                             for p in places:
@@ -353,7 +358,7 @@ class BuildResults:
                         if 'dbpedia' in r["s"]["value"]:
                             query += '. FILTER langMatches(lang(?l),"en" )'
                         query += '} }'
-                        events = query_private.QueryPrivate(conn, query).query()
+                        events = sparql_query_private.QueryPrivate(conn, query).query()
                         if events:
                             table += '<tr><td><h4>EVENTS</h4></td></tr>'
                             for p in events:
@@ -371,7 +376,7 @@ class BuildResults:
                         if 'dbpedia' in r["s"]["value"]:
                             query += '. FILTER langMatches(lang(?l),"en" )'
                         query += ' }'
-                        subs = query_private.QueryPrivate(conn, query).query()
+                        subs = sparql_query_private.QueryPrivate(conn, query).query()
 
                         if subs:
                             table += '<tr><td colspan="2"><h4>SUBJECTS</h4></td></tr>'
@@ -392,7 +397,7 @@ class BuildResults:
                             query += '. FILTER langMatches(lang(?l),"en" )'
                         query += '} }'
 
-                        things = query_private.QueryPrivate(conn, query).query()
+                        things = sparql_query_private.QueryPrivate(conn, query).query()
                         if things:
                             table += '<tr><td><h4>RELATED WORKS, OBJECTS AND THINGS</h4></td></tr>'
                             for p in things:
@@ -414,8 +419,9 @@ class BuildResults:
                 done = r["s"]["value"]
             session['results'] = table
 
+    # build the sameas table for display
     def buildsameastable(self):
-        logger.debug("DEBUG buildresults.py -- buildsameastable")
+        logger.debug("DEBUG build_explore_results.py -- buildsameastable")
         if self.sameas:
             session['sameas'] = self.sameas
         elif session.get('sameas'):

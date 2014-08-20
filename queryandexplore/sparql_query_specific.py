@@ -1,6 +1,9 @@
 __author__ = 'geekscruff'
 
-from querybuilder import endpoint, sparql_select
+"""Class to perform sparql queries from the search page. There is some hardcoded code in this class to deal with some of
+the quirks of different endpoints."""
+
+from queryandexplore import endpoint, sparql_select
 from urllib2 import URLError
 import logging
 
@@ -8,13 +11,9 @@ logger = logging.getLogger(__name__)
 
 # TODO a bit more logging and commenting might help here
 
-# Class to perform sparql queries from the search page. There is some hardcoded code in this class to deal with some of
-# the quirks of different endpoints.
-
-
 class SparqlQuery:
     def __init__(self, kind, ep):
-        logger.debug("DEBUG sparql_query.py - object instantiated")
+        logger.debug("DEBUG sparql_query_specific.py - object instantiated")
         self.kind = kind  # kind of search, so far only 'AND' is supported
         self.ep = ep  # the endpoint
         self.val = ""
@@ -26,11 +25,11 @@ class SparqlQuery:
             if self.kind == "AND":
                 # issue with dbpedia querying seems to have gone away!
                 # if "dbpedia" in self.ep:
-                #     logger.info("INFO sparql_query.py - querying dbpedia, use multiple UNIONs rather than && shorthand "
+                #     logger.info("INFO sparql_query_specific.py - querying dbpedia, use multiple UNIONs rather than && shorthand "
                 #                 "for FILTERing")
                 #     regex = self.buildregextwo()
                 #else:
-                logger.info("INFO sparql_query.py - use the && shorthand for FILTERing")
+                logger.info("INFO sparql_query_specific.py - use the && shorthand for FILTERing")
                 regex = self.buildregexone()
                 listy = self.buildtypeandlabel()
                 term = ""
@@ -47,13 +46,13 @@ class SparqlQuery:
                 if term.endswith(' UNION '):
                     term = term[:-7]
                 sel = sparql_select.SparqlSelect(term, self.ep, sel="?s ?o", dist=True, order="?o")
-                logger.debug("DEBUG sparql_query.py - name search performed")
+                logger.debug("DEBUG sparql_query_specific.py - name search performed")
                 return sel.select()
         except URLError as e:
-            logger.error("URLError sparql_query.py - " + e.message)
+            logger.error("URLError sparql_query_specific.py - " + e.message)
             return "error"  # TODO raise exception
         except Exception as e:
-            logger.error("ERROR! sparql_query.py - " + e.message)
+            logger.error("ERROR! sparql_query_specific.py - " + e.message)
             return "error"  # TODO raise exception
 
     # Return all information about a specific subject
@@ -81,10 +80,10 @@ class SparqlQuery:
             query = sparql_select.SparqlSelect(term, self.ep, sel="*", dist=True, limit='500')
             return query.select()
         except URLError as e:
-            logger.error("URLError sparql_query.py - " + e.message)
+            logger.error("URLError sparql_query_specific.py - " + e.message)
             return "error"  # TODO raise exception
         except Exception as e:
-            logger.error("ERROR! sparql_query.py - " + e.message)
+            logger.error("ERROR! sparql_query_specific.py - " + e.message)
             return "error"  # TODO raise exception
 
     def buildregexone(self):
@@ -167,7 +166,7 @@ class SparqlQuery:
                         typesandlabelslist.append("?s <" + result["o"]["value"] + "> ?o .")
 
         except Exception as e:
-            logger.error("ERROR! sparql_query.py - " + e.message)
+            logger.error("ERROR! sparql_query_specific.py - " + e.message)
             raise Exception("Something went wrong in building the types and labels")
         return typesandlabelslist
 

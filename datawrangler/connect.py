@@ -1,5 +1,7 @@
 __author__ = 'geekscruff'
 
+"""Creates the connection to the local repository"""
+
 from flask import Flask
 from franz.openrdf.sail.allegrographserver import AllegroGraphServer
 from franz.openrdf.repository.repository import Repository
@@ -9,8 +11,6 @@ import logging
 # Global variables
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
-
-# Creates the connection to the local repository
 
 class Connect():
     def __init__(self, repository, cat='default', new=False):  # Supply the repository name

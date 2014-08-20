@@ -23,7 +23,7 @@ class TestConnect(TestCase):
 
     def test_connect_url(self):
         conn = tryconn()
-        self.assertEqual(conn.repourl(), 'http://geekscruff.me:10035/catalogs/public-catalog/repositories/test')
+        self.assertEqual(conn.repourl(), 'http://localhost:10035/catalogs/public-catalog/repositories/test')
         conn.close()
 
     def test_connect_size(self):

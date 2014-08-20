@@ -5,6 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # This is just a test class at the moment
+# r = requests.get("http://viaf.org/viaf/search?query=cql.any+all%22dempsey%22", headers={"Accept": "application/rss+xml"})
 
 
 class OpensearchQuery:
@@ -13,7 +14,6 @@ class OpensearchQuery:
         self.tryaquery()
 
     def tryaquery(self):
-        print("dunno")
         client = Client('http://geekscruff.me/opensearch/VIAFallFieldsSearch.xml')
         results = client.search("jane austen")
 

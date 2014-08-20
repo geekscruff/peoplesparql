@@ -1,7 +1,7 @@
 __author__ = 'geekscruff'
 
-from datawrangler import connect, addtriple
-from querybuilder import sparql_ask, sparql_select
+from datawrangler import connect, add_triple
+from queryandexplore import sparql_ask, sparql_select
 import logging
 import warnings
 
@@ -81,7 +81,7 @@ class EndpointCreator:
                 results = sparql_ask.SparqlAsk("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(1) +
                                                ">", self.sparql).ask()
 
-                add = addtriple.AddTriple(self.conn)
+                add = add_triple.AddTriple(self.conn)
 
                 add.setupsubject(self.sparql)
 
@@ -115,7 +115,7 @@ class EndpointCreator:
 
     # Discover and store information about the dataset
     def setupdataset(self, version):
-        add = addtriple.AddTriple(self.conn)
+        add = add_triple.AddTriple(self.conn)
         add.setupsubject('http://geekscruff/ns/datasetservicedby#' + self.sparql)
 
         # If the original ASK query fails, use SELECT queries
@@ -132,7 +132,7 @@ class EndpointCreator:
                     add.adduri('http://geekscruff.me/ns/dataset#typeForPersonalName', switch(x + 1))
 
                     # Check for rdfs:label and skos:prefLabel - assuming that one or other of these will be used, if not setup will fail
-                    label1 = sparql_select.SparqlSelect("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(x + 1) + "> . ?s http://www.w3.org/2000/01/rdf-schema#label ?o", self.sparql, limit=1, sel="?s").select()
+                    label1 = sparql_select.SparqlSelect("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(x + 1) + "> . ?s <http://www.w3.org/2000/01/rdf-schema#label> ?o", self.sparql, limit=1, sel="?s").select()
                     if "[]" not in str(label1) and str(label1) != "error":
                         add.adduri('http://geekscruff.me/ns/dataset#labelForPersonalName', 'http://www.w3.org/2000/01/rdf-schema#label')
                     label2 = sparql_select.SparqlSelect("?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + switch(x + 1) + "> . ?s <http://www.w3.org/2004/02/skos/core#prefLabel> ?o", self.sparql, limit=1, sel="?s").select()

@@ -1,12 +1,11 @@
 __author__ = 'geekscruff'
 
 from unittest import TestCase
-from querybuilder import sparql_query
-import json
+from queryandexplore import sparql_query_specific
 
 class TestSparqlQuery(TestCase):
     def setUp(self):
-        r = sparql_query.SparqlQuery('AND', 'http://localhost:10035/catalogs/public-catalog/repositories/artworldppl')
+        r = sparql_query_specific.SparqlQuery('AND', 'http://localhost:10035/catalogs/public-catalog/repositories/artworldppl')
         return r
 
     #'http://data.archiveshub.ac.uk/sparql'
@@ -30,14 +29,3 @@ class TestSparqlQuery(TestCase):
         r = self.setUp()
         results = str(r.allsearch('http://dlib.york.ac.uk/id/person/35403', 'literal'))
         self.assertIn("Maingaud", results)
-
-    # def test_endpointallsearch_dbpedia(self):
-    #     r = self.setUp()
-    #     r.buildtypeandlabel()
-    #     self.assertIn('Charles_Darwin', str(r.allsearch('http://dbpedia.org/resource/Charles_Darwin')))
-
-    # def test_getendpoint(self):
-    #     r = self.setUp()
-    #     res = r.getendpointdetails()
-    #     print(res)
-    #     self.assertIn('Charles_Darwin', res)

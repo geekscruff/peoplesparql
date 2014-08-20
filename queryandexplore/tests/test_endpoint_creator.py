@@ -1,7 +1,7 @@
 __author__ = 'geekscruff'
 
 from unittest import TestCase
-from querybuilder import endpoint_creator
+from queryandexplore import endpoint_creator
 from datawrangler import connect
 
 
@@ -10,7 +10,7 @@ class TestEndpointCreator(TestCase):
         conn = connect.Connect('test')
         conn.deletetestdata()
         conn.close()
-        r = endpoint_creator.EndpointCreator(ep, 'test', 'Archives Hub')
+        r = endpoint_creator.EndpointCreator(ep, 'test')
         self.ep = ep
         return r
 

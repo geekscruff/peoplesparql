@@ -1,7 +1,7 @@
 __author__ = 'geekscruff'
 
 from unittest import TestCase
-from querybuilder import sparql_select
+from queryandexplore import sparql_select
 
 class TestSelect(TestCase):
 
@@ -19,13 +19,6 @@ class TestSelect(TestCase):
         results = r.select()
         self.assertIn("[]", str.lower(str(results)))
 
-    def test_select_namedgraph(self):
-        r = sparql_select.SparqlSelect('?s ?p ?o',
-            'http://localhost:10035/catalogs/public-catalog/repositories/test2',
-            dist=True, ng='<http://geekscruff.me/tmp#j.allinson@gmail.com>')
-        results = r.select()
-        self.assertIn("geekscruff", str.lower(str(results)))
-
     def test_select_inferredinbm(self):
         #select distinct ?o where { <http://collection.britishmuseum.org/id/object/ESA2078/find> a ?o }
         r = sparql_select.SparqlSelect('<http://collection.britishmuseum.org/id/object/ESA2078/find> a ?o',
@@ -38,6 +31,5 @@ class TestSelect(TestCase):
         r = sparql_select.SparqlSelect('<http://dbpedia.org/resource/John_Stevens_Henslow> a ?o',
             'http://dbpedia.org/sparql', sel='?o', dist=True)
         results = r.select()
-        # this proves bm endpoint is returning inferred results
-        print results
-        self.assertIn('http://erlangen-crm.org/current/E5_Event', str(results))
+        # this proves db endpoint is returning inferred results
+        self.assertIn('http://dbpedia.org/ontology/Agent', str(results))
