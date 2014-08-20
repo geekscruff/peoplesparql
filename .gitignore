@@ -45,7 +45,7 @@ Thumbs.db
 franz/*
 flaskext/*
 
-##pyc###
+# pyc #
 ########
 .pyc
 
